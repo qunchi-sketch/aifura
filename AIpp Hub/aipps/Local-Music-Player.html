@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>Aifura Local Music Player</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <style>
+    :root {
+      --bg: radial-gradient(circle at top, #020617 0%, #020617 40%, #020617 60%, #020617 100%);
+      --card-bg: rgba(15,23,42,0.92);
+      --card-border: rgba(148,163,184,0.4);
+      --accent: #4f46e5;
+      --accent-soft: rgba(79,70,229,0.18);
+      --accent-strong: #7c3aed;
+      --text: #e5e7eb;
+      --text-soft: #9ca3af;
+      --danger: #f97373;
+      --radius-xl: 26px;
+      --radius-lg: 20px;
+      --radius-md: 12px;
+      --shadow-soft: 0 18px 60px rgba(15,23,42,0.9);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(129,140,248,0.28), transparent 55%),
+        radial-gradient(circle at 90% 0%, rgba(236,72,153,0.24), transparent 55%),
+        #020617;
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 520px;
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, rgba(148,163,184,0.08), transparent 55%), var(--card-bg);
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(148,163,184,0.45);
+      box-shadow: var(--shadow-soft);
+      padding: 18px 16px 14px;
+      backdrop-filter: blur(20px);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .logo-block {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: conic-gradient(from 140deg, #4f46e5, #ec4899, #22d3ee, #4f46e5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 18px rgba(129,140,248,0.65);
+    }
+
+    .logo-circle span {
+      font-size: 16px;
+      font-weight: 800;
+      color: white;
+    }
+
+    .title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .lang-switch {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.45);
+      background: rgba(15,23,42,0.9);
+      padding: 3px;
+      gap: 3px;
+      font-size: 11px;
+    }
+
+    .lang-btn {
+      border: none;
+      outline: none;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text-soft);
+      cursor: pointer;
+      min-width: 30px;
+    }
+
+    .lang-btn.active {
+      background: var(--accent-soft);
+      color: #e0e7ff;
+      font-weight: 600;
+    }
+
+    .pill {
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.4);
+      color: #cbd5f5;
+      background: radial-gradient(circle at top, rgba(59,130,246,0.35), rgba(15,23,42,0.95));
+      margin-top: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 8px rgba(34,197,94,0.9);
+    }
+
+    .intro {
+      margin-bottom: 12px;
+      padding: 10px 10px 10px;
+      border-radius: var(--radius-lg);
+      border: 1px dashed rgba(148,163,184,0.4);
+      background: radial-gradient(circle at top left, rgba(129,140,248,0.16), transparent 60%);
+      font-size: 11px;
+      color: var(--text-soft);
+      display: flex;
+      gap: 8px;
+    }
+
+    .intro-icon {
+      font-size: 16px;
+      margin-top: 2px;
+    }
+
+    .intro-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .intro-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #cbd5f5;
+      margin-bottom: 3px;
+    }
+
+    .intro-desc {
+      line-height: 1.5;
+    }
+
+    #file-input {
+      display: none;
+    }
+
+    .primary-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: none;
+      outline: none;
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      cursor: pointer;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      box-shadow: 0 10px 26px rgba(79,70,229,0.65);
+      flex-shrink: 0;
+    }
+
+    .btn:active {
+      transform: translateY(1px) scale(0.99);
+      box-shadow: 0 5px 14px rgba(79,70,229,0.65);
+    }
+
+    .btn-secondary {
+      background: rgba(15,23,42,0.9);
+      color: var(--text-soft);
+      box-shadow: none;
+      border: 1px solid rgba(51,65,85,0.9);
+      padding-inline: 10px;
+      font-weight: 500;
+    }
+
+    .file-status {
+      margin-top: 6px;
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .file-status strong {
+      color: #e0e7ff;
+    }
+
+    .player-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.25fr);
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 480px) {
+      .player-layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .current {
+      border-radius: var(--radius-lg);
+      background: radial-gradient(circle at top left, rgba(79,70,229,0.35), rgba(15,23,42,0.9));
+      border: 1px solid rgba(129,140,248,0.65);
+      padding: 10px 10px 10px;
+      position: relative;
+      overflow: hidden;
+      min-height: 190px;
+    }
+
+    .glass-glow {
+      position: absolute;
+      inset: -20%;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(129,140,248,0.35), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(236,72,153,0.22), transparent 55%);
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .current-inner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .now-label {
+      font-size: 11px;
+      color: #c7d2fe;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 10px rgba(34,197,94,0.9);
+    }
+
+    .track-main {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .cover {
+      width: 72px;
+      height: 72px;
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(255,255,255,0.12), transparent 60%),
+        conic-gradient(from 140deg, #4f46e5, #22d3ee, #ec4899, #4f46e5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 30px rgba(15,23,42,0.9);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cover-inner {
+      width: 62px;
+      height: 62px;
+      border-radius: 20px;
+      background: radial-gradient(circle at top, rgba(15,23,42,0.9), #020617);
+      border: 1px solid rgba(148,163,184,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: #a5b4fc;
+    }
+
+    .cover-spin {
+      animation: spin 16s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .track-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .track-title {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+
+    .track-sub {
+      font-size: 11px;
+      color: var(--text-soft);
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .track-sub span {
+      white-space: nowrap;
+    }
+
+    .progress-area {
+      margin-top: auto;
+    }
+
+    .progress-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 10px 0 6px;
+    }
+
+    .time-label {
+      font-size: 11px;
+      color: var(--text-soft);
+      min-width: 32px;
+      text-align: center;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.85);
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #f9fafb;
+      box-shadow: 0 0 0 4px rgba(79,70,229,0.55);
+      margin-top: -5px;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #f9fafb;
+      border: none;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 6px 0 2px;
+    }
+
+    .ctrl-main {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
+
+    .ctrl-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.6);
+      background: radial-gradient(circle at top, rgba(15,23,42,1), rgba(15,23,42,0.9));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 16px;
+    }
+
+    .ctrl-btn-main {
+      width: 58px;
+      height: 58px;
+      border-radius: 999px;
+      border: none;
+      background: radial-gradient(circle at top, #4f46e5, #7c3aed);
+      color: white;
+      font-size: 22px;
+      box-shadow: 0 18px 40px rgba(79,70,229,0.9);
+    }
+
+    .ctrl-btn:active {
+      transform: translateY(1px) scale(0.98);
+    }
+
+    .ctrl-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .mode-pill {
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(55,65,81,0.9);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .mode-pill span.icon {
+      font-size: 12px;
+    }
+
+    .volume-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-soft);
+      margin-top: 4px;
+    }
+
+    .volume-icon {
+      font-size: 14px;
+    }
+
+    .volume-row input[type="range"] {
+      max-width: 140px;
+    }
+
+    .playlist {
+      border-radius: var(--radius-lg);
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(31,41,55,0.95);
+      padding: 7px 6px 6px;
+      max-height: 260px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .playlist-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2px 4px 6px 4px;
+      font-size: 11px;
+      color: var(--text-soft);
+      border-bottom: 1px solid rgba(31,41,55,0.9);
+      margin-bottom: 4px;
+    }
+
+    .playlist-header-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .playlist-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #4ade80;
+    }
+
+    .playlist-count {
+      font-size: 11px;
+    }
+
+    .playlist-list {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .playlist-list ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .playlist-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 7px;
+      border-radius: 10px;
+      font-size: 12px;
+      color: var(--text-soft);
+      cursor: pointer;
+    }
+
+    .playlist-list li:hover {
+      background: rgba(15,23,42,0.9);
+    }
+
+    .playlist-list li.active {
+      background: linear-gradient(90deg, rgba(79,70,229,0.25), transparent);
+      color: #e5e7eb;
+    }
+
+    .li-main {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .li-index {
+      font-size: 10px;
+      opacity: 0.7;
+      width: 18px;
+    }
+
+    .li-name {
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .li-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      flex-shrink: 0;
+    }
+
+    .badge-playing {
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(129,140,248,0.8);
+      color: #c7d2fe;
+    }
+
+    .badge-size {
+      opacity: 0.7;
+    }
+
+    .empty-state {
+      font-size: 11px;
+      color: var(--text-soft);
+      padding: 8px 6px;
+    }
+
+    .footer {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-soft);
+      line-height: 1.6;
+    }
+
+    .footer a {
+      color: #93c5fd;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    .footer span.en {
+      display: block;
+      margin-top: 2px;
+    }
+
+    .hint {
+      font-size: 10px;
+      color: var(--text-soft);
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+
+    .hint strong {
+      color: #c4b5fd;
+    }
+
+    @media (max-width: 360px) {
+      .ctrl-main {
+        gap: 10px;
+      }
+      .ctrl-btn {
+        width: 34px;
+        height: 34px;
+      }
+      .ctrl-btn-main {
+        width: 52px;
+        height: 52px;
+      }
+      .cover {
+        width: 66px;
+        height: 66px;
+      }
+      .cover-inner {
+        width: 56px;
+        height: 56px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="card">
+      <div class="header">
+        <div>
+          <div class="logo-block">
+            <div class="logo-circle" aria-hidden="true"><span>Af</span></div>
+            <div class="title-block">
+              <div class="title" id="title-text">本地音乐播放器</div>
+              <div class="subtitle" id="subtitle-text">导入你的歌曲，一键本地播放</div>
+            </div>
+          </div>
+          <div class="pill">
+            <span class="pill-dot"></span>
+            <span id="pill-text">本地离线 · 纯前端 AIPP</span>
+          </div>
+        </div>
+        <div class="lang-switch" aria-label="Language switch">
+          <button class="lang-btn active" data-lang="zh">中</button>
+          <button class="lang-btn" data-lang="en">EN</button>
+        </div>
+      </div>
+
+      <div class="intro">
+        <div class="intro-icon">🎧</div>
+        <div class="intro-main">
+          <div class="intro-title" id="intro-title">首次导入你的本地音乐</div>
+          <div class="intro-desc" id="intro-desc">
+            文件仅保存在本机浏览器，不会上传到任何服务器。导入一次后，下次打开仍可直接播放。
+          </div>
+
+          <div class="primary-actions">
+            <label class="btn" for="file-input" id="import-btn-label">
+              <span id="import-btn-text">＋ 导入音乐库</span>
+            </label>
+            <button class="btn btn-secondary" id="clear-btn">
+              <span id="clear-btn-text">重置音乐库</span>
+            </button>
+          </div>
+
+          <input id="file-input" type="file" accept="audio/*" multiple />
+
+          <div class="file-status" id="file-status">
+            当前本地音乐库：<strong>0 首</strong> · 首次使用请先导入音乐。
+          </div>
+        </div>
+      </div>
+
+      <div class="player-layout">
+        <div class="current">
+          <div class="glass-glow"></div>
+          <div class="current-inner">
+            <div class="now-label">
+              <span class="pulse-dot"></span>
+              <span id="now-label-text">正在播放</span>
+            </div>
+
+            <div class="track-main">
+              <div class="cover" id="cover">
+                <div class="cover-inner" id="cover-inner">♫</div>
+              </div>
+              <div class="track-text">
+                <div class="track-title" id="track-title">尚未选择歌曲</div>
+                <div class="track-sub">
+                  <span id="track-status">导入音乐后开始播放</span>
+                  <span id="track-count">0 首</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="progress-area">
+              <div class="progress-row">
+                <span class="time-label" id="current-time">0:00</span>
+                <input type="range" id="progress" min="0" max="100" value="0" />
+                <span class="time-label" id="duration">0:00</span>
+              </div>
+
+              <div class="controls">
+                <div class="ctrl-main">
+                  <button class="ctrl-btn" id="prev-btn" title="上一首">⏮</button>
+                  <button class="ctrl-btn ctrl-btn-main" id="play-btn" title="播放/暂停">▶</button>
+                  <button class="ctrl-btn" id="next-btn" title="下一首">⏭</button>
+                </div>
+                <div class="ctrl-meta">
+                  <div class="mode-pill" id="mode-btn" title="循环模式">
+                    <span class="icon" id="mode-icon">🔁</span>
+                    <span id="mode-text">列表循环</span>
+                  </div>
+                  <div class="mode-pill" id="shuffle-btn" title="随机播放">
+                    <span class="icon">🔀</span>
+                    <span id="shuffle-text">顺序</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="volume-row">
+                <span class="volume-icon" id="volume-icon">🔊</span>
+                <input type="range" id="volume" min="0" max="1" step="0.01" value="0.85" />
+                <span id="volume-text">音量</span>
+              </div>
+              <div class="hint" id="hint-text">
+                小提示：建议使用 Safari / Chrome 打开本页面，锁屏后也可继续播放（具体表现视手机系统与浏览器而定）。
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="playlist">
+          <div class="playlist-header">
+            <div class="playlist-header-left">
+              <span class="playlist-dot"></span>
+              <span id="playlist-title">播放列表</span>
+            </div>
+            <span class="playlist-count" id="playlist-count">0 首</span>
+          </div>
+          <div class="playlist-list">
+            <ul id="playlist"></ul>
+            <div class="empty-state" id="empty-state">
+              尚未导入任何歌曲。导入本地音乐后，这里会显示你的播放列表。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <span id="footer-zh">
+          更多好用工具，请访问：
+          <a href="https://aifura.com" target="_blank" rel="noopener noreferrer">aifura.com</a>
+        </span>
+        <span class="en" id="footer-en">
+          For more handy tools, please visit
+          <a href="https://aifura.com" target="_blank" rel="noopener noreferrer">aifura.com</a>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <audio id="audio" preload="metadata"></audio>
+
+  <script>
+    (function () {
+      const i18n = {
+        zh: {
+          title: "本地音乐播放器",
+          subtitle: "导入你的歌曲，一键本地播放",
+          pill: "本地离线 · 纯前端 AIPP",
+          introTitle: "首次导入你的本地音乐",
+          introDesc: "文件仅保存在本机浏览器，不会上传到任何服务器。导入一次后，下次打开仍可直接播放。",
+          importBtn: "＋ 导入音乐库",
+          clearBtn: "重置音乐库",
+          fileStatusEmpty: "当前本地音乐库：<strong>0 首</strong> · 首次使用请先导入音乐。",
+          fileStatusCount: count => `当前本地音乐库：<strong>${count} 首</strong> · 下次打开仍可直接播放。`,
+          nowLabel: "正在播放",
+          noTrackTitle: "尚未选择歌曲",
+          noTrackStatus: "导入音乐后开始播放",
+          trackCount: count => `${count} 首`,
+          timeZero: "0:00",
+          modeList: "列表循环",
+          modeSingle: "单曲循环",
+          modeNone: "不循环",
+          shuffleOn: "随机",
+          shuffleOff: "顺序",
+          volume: "音量",
+          hint: "小提示：建议使用 Safari / Chrome 打开本页面，锁屏后也可继续播放（具体表现视手机系统与浏览器而定）。",
+          playlistTitle: "播放列表",
+          playlistEmpty: "尚未导入任何歌曲。导入本地音乐后，这里会显示你的播放列表。",
+          playingTag: "正在播放",
+          footerZh: "更多好用工具，请访问：",
+          footerEn: "For more handy tools, please visit",
+          resetConfirm: "确定要重置本地音乐库吗？这会删除浏览器中保存的歌曲数据（不影响你手机里的原始文件）。",
+          importing: "正在导入：",
+          importingDone: "导入完成",
+          importingHint: "根据歌曲数量与大小，这一步可能需要一点时间。"
+        },
+        en: {
+          title: "Local Music Player",
+          subtitle: "Import your songs and play them locally",
+          pill: "Offline · Pure Frontend AIPP",
+          introTitle: "Import your local music for the first time",
+          introDesc: "Files are stored only in this browser and never uploaded to any server. Import once, and play directly next time.",
+          importBtn: "+ Import Library",
+          clearBtn: "Reset Library",
+          fileStatusEmpty: "Current local library: <strong>0 tracks</strong>. Please import music to get started.",
+          fileStatusCount: count => `Current local library: <strong>${count} tracks</strong>. They stay available next time you open this page.`,
+          nowLabel: "Now Playing",
+          noTrackTitle: "No track selected",
+          noTrackStatus: "Import your music to start playing",
+          trackCount: count => `${count} tracks`,
+          timeZero: "0:00",
+          modeList: "List Loop",
+          modeSingle: "Single Loop",
+          modeNone: "No Loop",
+          shuffleOn: "Shuffle",
+          shuffleOff: "Order",
+          volume: "Volume",
+          hint: "Tip: For best experience, open this page in Safari / Chrome. Lock-screen playback depends on your OS & browser.",
+          playlistTitle: "Playlist",
+          playlistEmpty: "No tracks yet. After importing your music, your playlist will appear here.",
+          playingTag: "Playing",
+          footerZh: "更多好用工具，请访问：",
+          footerEn: "For more handy tools, please visit",
+          resetConfirm: "Reset local music library? This only clears data in this browser and will NOT affect original files on your phone.",
+          importing: "Importing: ",
+          importingDone: "Import completed",
+          importingHint: "Depending on file size and count, this may take a moment."
+        }
+      };
+
+      let currentLang = (navigator.language || "").toLowerCase().startsWith("zh") ? "zh" : "zh";
+
+      const langBtns = document.querySelectorAll(".lang-btn");
+
+      const titleText = document.getElementById("title-text");
+      const subtitleText = document.getElementById("subtitle-text");
+      const pillText = document.getElementById("pill-text");
+      const introTitle = document.getElementById("intro-title");
+      const introDesc = document.getElementById("intro-desc");
+      const importBtnText = document.getElementById("import-btn-text");
+      const clearBtn = document.getElementById("clear-btn");
+      const clearBtnText = document.getElementById("clear-btn-text");
+      const fileStatus = document.getElementById("file-status");
+
+      const nowLabelText = document.getElementById("now-label-text");
+      const trackTitleEl = document.getElementById("track-title");
+      const trackStatusEl = document.getElementById("track-status");
+      const trackCountEl = document.getElementById("track-count");
+
+      const currentTimeEl = document.getElementById("current-time");
+      const durationEl = document.getElementById("duration");
+      const progress = document.getElementById("progress");
+
+      const prevBtn = document.getElementById("prev-btn");
+      const playBtn = document.getElementById("play-btn");
+      const nextBtn = document.getElementById("next-btn");
+      const modeBtn = document.getElementById("mode-btn");
+      const modeIcon = document.getElementById("mode-icon");
+      const modeText = document.getElementById("mode-text");
+      const shuffleBtn = document.getElementById("shuffle-btn");
+      const shuffleText = document.getElementById("shuffle-text");
+
+      const volumeSlider = document.getElementById("volume");
+      const volumeIcon = document.getElementById("volume-icon");
+      const volumeText = document.getElementById("volume-text");
+      const hintText = document.getElementById("hint-text");
+
+      const playlistTitle = document.getElementById("playlist-title");
+      const playlistCount = document.getElementById("playlist-count");
+      const playlistUl = document.getElementById("playlist");
+      const emptyState = document.getElementById("empty-state");
+
+      const footerZh = document.getElementById("footer-zh");
+      const footerEn = document.getElementById("footer-en");
+
+      const fileInput = document.getElementById("file-input");
+      const audio = document.getElementById("audio");
+      const cover = document.getElementById("cover");
+      const coverInnerEl = document.getElementById("cover-inner");
+
+      let db = null;
+      const DB_NAME = "AifuraMusicPlayer";
+      const DB_VERSION = 1;
+      const STORE_NAME = "tracks";
+
+      let tracks = [];
+      let currentIndex = -1;
+      let isSeeking = false;
+
+      let loopMode = "list";
+      let shuffleMode = false;
+      let shuffleOrder = [];
+      let shufflePointer = 0;
+
+      function formatTime(seconds) {
+        if (isNaN(seconds) || !isFinite(seconds)) return i18n[currentLang].timeZero;
+        const m = Math.floor(seconds / 60);
+        const s = Math.floor(seconds % 60);
+        return m + ":" + (s < 10 ? "0" + s : s);
+      }
+
+      function formatSize(bytes) {
+        if (!bytes && bytes !== 0) return "";
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+        return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+      }
+
+      function setLang(lang) {
+        currentLang = lang;
+        const t = i18n[lang];
+
+        titleText.textContent = t.title;
+        subtitleText.textContent = t.subtitle;
+        pillText.textContent = t.pill;
+        introTitle.textContent = t.introTitle;
+        introDesc.textContent = t.introDesc;
+        importBtnText.textContent = t.importBtn;
+        clearBtnText.textContent = t.clearBtn;
+        nowLabelText.textContent = t.nowLabel;
+        volumeText.textContent = t.volume;
+        hintText.textContent = t.hint;
+        playlistTitle.textContent = t.playlistTitle;
+
+        if (!tracks.length) {
+          fileStatus.innerHTML = t.fileStatusEmpty;
+        } else {
+          fileStatus.innerHTML = t.fileStatusCount(tracks.length);
+        }
+
+        playlistCount.textContent = t.trackCount(tracks.length);
+        trackCountEl.textContent = t.trackCount(tracks.length);
+
+        if (!tracks.length) {
+          trackTitleEl.textContent = t.noTrackTitle;
+          trackStatusEl.textContent = t.noTrackStatus;
+        }
+
+        if (loopMode === "list") {
+          modeIcon.textContent = "🔁";
+          modeText.textContent = t.modeList;
+        } else if (loopMode === "single") {
+          modeIcon.textContent = "🔂";
+          modeText.textContent = t.modeSingle;
+        } else {
+          modeIcon.textContent = "⏹";
+          modeText.textContent = t.modeNone;
+        }
+
+        shuffleText.textContent = shuffleMode ? t.shuffleOn : t.shuffleOff;
+
+        if (!tracks.length) {
+          emptyState.textContent = t.playlistEmpty;
+          emptyState.style.display = "block";
+        } else {
+          emptyState.style.display = "none";
+        }
+
+        footerZh.firstChild.textContent = t.footerZh;
+        footerEn.firstChild.textContent = t.footerEn + " ";
+
+        currentTimeEl.textContent = t.timeZero;
+        durationEl.textContent = t.timeZero;
+
+        langBtns.forEach(btn => {
+          btn.classList.toggle("active", btn.dataset.lang === lang);
+        });
+      }
+
+      function openDB() {
+        return new Promise((resolve, reject) => {
+          const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+          request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+              db.createObjectStore(STORE_NAME, { keyPath: "id" });
+            }
+          };
+
+          request.onsuccess = (event) => {
+            db = event.target.result;
+            resolve();
+          };
+
+          request.onerror = (event) => {
+            console.error("IndexedDB error:", event.target.error);
+            reject(event.target.error);
+          };
+        });
+      }
+
+      function getAllTracksFromDB() {
+        return new Promise((resolve, reject) => {
+          if (!db) {
+            resolve([]);
+            return;
+          }
+          const tx = db.transaction(STORE_NAME, "readonly");
+          const store = tx.objectStore(STORE_NAME);
+          const request = store.getAll();
+
+          request.onsuccess = () => {
+            resolve(request.result || []);
+          };
+          request.onerror = (event) => {
+            console.error("getAll error:", event.target.error);
+            reject(event.target.error);
+          };
+        });
+      }
+
+      function clearDB() {
+        return new Promise((resolve, reject) => {
+          if (!db) {
+            resolve();
+            return;
+          }
+          const tx = db.transaction(STORE_NAME, "readwrite");
+          const store = tx.objectStore(STORE_NAME);
+          const request = store.clear();
+          tx.oncomplete = () => resolve();
+          tx.onerror = (event) => {
+            console.error("clear error:", event.target.error);
+            reject(event.target.error);
+          };
+        });
+      }
+
+      // ★★★ Edge 兼容：顺序写入 + Blob 包装 + put() ★★★
+      function addFilesToDB(files) {
+        return new Promise((resolve, reject) => {
+          if (!db || !files.length) {
+            resolve();
+            return;
+          }
+          const t = i18n[currentLang];
+          const tx = db.transaction(STORE_NAME, "readwrite");
+          const store = tx.objectStore(STORE_NAME);
+
+          let index = 0;
+
+          function writeNext() {
+            if (index >= files.length) return;
+            const file = files[index];
+
+            const safeBlob = new Blob([file], { type: file.type || "audio/mpeg" });
+
+            const id =
+              Date.now() +
+              "-" +
+              index +
+              "-" +
+              Math.random().toString(16).slice(2);
+
+            const record = {
+              id,
+              name: file.name,
+              size: file.size,
+              type: file.type,
+              lastModified: file.lastModified,
+              blob: safeBlob
+            };
+
+            const req = store.put(record);
+            const displayIndex = index + 1;
+            fileStatus.innerHTML =
+              t.importing +
+              `<strong>${displayIndex} / ${files.length}</strong> · ` +
+              t.importingHint;
+
+            req.onsuccess = () => {
+              index++;
+              writeNext();
+            };
+            req.onerror = (e) => {
+              console.error("put error", e.target.error);
+              index++;
+              writeNext();
+            };
+          }
+
+          tx.oncomplete = () => {
+            fileStatus.innerHTML = t.importingDone;
+            resolve();
+          };
+          tx.onerror = (e) => {
+            console.error("tx error", e.target.error);
+            reject(e.target.error);
+          };
+
+          writeNext();
+        });
+      }
+
+      let currentObjectUrl = null;
+
+      function cleanupObjectUrl() {
+        if (currentObjectUrl && currentObjectUrl.startsWith("blob:")) {
+          try { URL.revokeObjectURL(currentObjectUrl); } catch (e) {}
+          currentObjectUrl = null;
+        }
+      }
+
+      function updateShuffleOrder() {
+        shuffleOrder = tracks.map((_, idx) => idx);
+        for (let i = shuffleOrder.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffleOrder[i], shuffleOrder[j]] = [shuffleOrder[j], shuffleOrder[i]];
+        }
+        shufflePointer = shuffleOrder.indexOf(currentIndex);
+        if (shufflePointer === -1) shufflePointer = 0;
+      }
+
+      function loadTrack(index, autoPlay) {
+        if (!tracks.length || index < 0 || index >= tracks.length) return;
+
+        currentIndex = index;
+        const track = tracks[index];
+
+        cleanupObjectUrl();
+        currentObjectUrl = URL.createObjectURL(track.blob);
+        audio.src = currentObjectUrl;
+
+        const t = i18n[currentLang];
+        trackTitleEl.textContent = track.name || "Track " + (index + 1);
+        trackStatusEl.textContent = t.nowLabel;
+        trackCountEl.textContent = t.trackCount(tracks.length);
+
+        updatePlaylistUI();
+
+        cover.classList.add("cover-spin");
+        coverInnerEl.textContent = "♫";
+
+        progress.value = 0;
+        currentTimeEl.textContent = t.timeZero;
+        durationEl.textContent = t.timeZero;
+
+        if (autoPlay) {
+          audio.play().then(() => {
+            setPlayState(true);
+          }).catch(() => {
+            setPlayState(false);
+          });
+        } else {
+          setPlayState(false);
+        }
+      }
+
+      function setPlayState(isPlaying) {
+        playBtn.textContent = isPlaying ? "⏸" : "▶";
+        const t = i18n[currentLang];
+        trackStatusEl.textContent = isPlaying ? t.nowLabel : t.noTrackStatus;
+        if (isPlaying) {
+          cover.classList.add("cover-spin");
+        } else {
+          cover.classList.remove("cover-spin");
+        }
+      }
+
+      function playNext() {
+        if (!tracks.length) return;
+        if (shuffleMode && shuffleOrder.length) {
+          shufflePointer = (shufflePointer + 1) % shuffleOrder.length;
+          const nextIndex = shuffleOrder[shufflePointer];
+          loadTrack(nextIndex, true);
+          return;
+        }
+
+        if (loopMode === "single") {
+          loadTrack(currentIndex, true);
+          return;
+        }
+
+        if (loopMode === "none") {
+          const nextIndex = currentIndex + 1;
+          if (nextIndex < tracks.length) {
+            loadTrack(nextIndex, true);
+          } else {
+            setPlayState(false);
+          }
+          return;
+        }
+
+        const nextIndex = (currentIndex + 1) % tracks.length;
+        loadTrack(nextIndex, true);
+      }
+
+      function playPrev() {
+        if (!tracks.length) return;
+
+        if (shuffleMode && shuffleOrder.length) {
+          shufflePointer = (shufflePointer - 1 + shuffleOrder.length) % shuffleOrder.length;
+          const prevIndex = shuffleOrder[shufflePointer];
+          loadTrack(prevIndex, true);
+          return;
+        }
+
+        const prevIndex = (currentIndex - 1 + tracks.length) % tracks.length;
+        loadTrack(prevIndex, true);
+      }
+
+      function updatePlaylistUI() {
+        const t = i18n[currentLang];
+
+        playlistUl.innerHTML = "";
+        tracks.forEach((track, index) => {
+          const li = document.createElement("li");
+          li.dataset.index = index;
+
+          const main = document.createElement("div");
+          main.className = "li-main";
+
+          const indexSpan = document.createElement("span");
+          indexSpan.className = "li-index";
+          indexSpan.textContent = index + 1;
+
+          const nameSpan = document.createElement("span");
+          nameSpan.className = "li-name";
+          nameSpan.textContent = track.name || ("Track " + (index + 1));
+
+          main.appendChild(indexSpan);
+          main.appendChild(nameSpan);
+
+          const meta = document.createElement("div");
+          meta.className = "li-meta";
+
+          const sizeSpan = document.createElement("span");
+          sizeSpan.className = "badge-size";
+          sizeSpan.textContent = formatSize(track.size);
+
+          meta.appendChild(sizeSpan);
+
+          if (index === currentIndex) {
+            li.classList.add("active");
+            const playingSpan = document.createElement("span");
+            playingSpan.className = "badge-playing";
+            playingSpan.textContent = t.playingTag;
+            meta.appendChild(playingSpan);
+          }
+
+          li.appendChild(main);
+          li.appendChild(meta);
+
+          li.addEventListener("click", () => {
+            loadTrack(index, true);
+          });
+
+          playlistUl.appendChild(li);
+        });
+
+        playlistCount.textContent = t.trackCount(tracks.length);
+        trackCountEl.textContent = t.trackCount(tracks.length);
+        if (!tracks.length) {
+          emptyState.textContent = t.playlistEmpty;
+          emptyState.style.display = "block";
+        } else {
+          emptyState.style.display = "none";
+        }
+      }
+
+      langBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const lang = btn.dataset.lang;
+          setLang(lang);
+        });
+      });
+
+fileInput.addEventListener("change", async () => {
+  const files = Array.from(fileInput.files || []).filter(f => f.type.startsWith("audio/"));
+  if (!files.length) return;
+
+  const t = i18n[currentLang];
+
+  // 1）无论 IndexedDB 是否可用，先让本次会话直接可用
+  tracks = files.map((file, idx) => ({
+    id: Date.now() + "-" + idx + "-" + Math.random().toString(16).slice(2),
+    name: file.name,
+    size: file.size,
+    type: file.type,
+    lastModified: file.lastModified,
+    blob: file    // 这里用 File 也没问题
+  }));
+  currentIndex = -1;
+
+  fileStatus.innerHTML = t.fileStatusCount(tracks.length);
+  updatePlaylistUI();
+  setLang(currentLang); // 刷新文案（语言 + 计数）
+
+  // 2）如果 IndexedDB 可用，就后台尝试持久化（失败也不影响当前播放）
+  if (db) {
+    try {
+      await clearDB();
+      await addFilesToDB(files);   // 里面已经做了 Edge 兼容的顺序写入 + Blob 包装
+    } catch (e) {
+      console.warn("Persist to IndexedDB failed, using memory only.", e);
+    }
+  }
+
+  // 3）自动播放第一首
+  if (tracks.length) {
+    loadTrack(0, true);
+    if (shuffleMode) {
+      updateShuffleOrder();
+    }
+  }
+
+  fileInput.value = "";
+});
+
+
+      clearBtn.addEventListener("click", async () => {
+        const t = i18n[currentLang];
+        if (!window.confirm(t.resetConfirm)) return;
+
+        await clearDB();
+        tracks = [];
+        currentIndex = -1;
+        cleanupObjectUrl();
+        audio.src = "";
+
+        setLang(currentLang);
+        updatePlaylistUI();
+      });
+
+      playBtn.addEventListener("click", () => {
+        if (!tracks.length) return;
+        if (currentIndex === -1) {
+          loadTrack(0, true);
+          return;
+        }
+        if (audio.paused) {
+          audio.play().then(() => setPlayState(true));
+        } else {
+          audio.pause();
+          setPlayState(false);
+        }
+      });
+
+      prevBtn.addEventListener("click", () => {
+        if (!tracks.length) return;
+        if (currentIndex === -1) {
+          loadTrack(0, true);
+          return;
+        }
+        playPrev();
+      });
+
+      nextBtn.addEventListener("click", () => {
+        if (!tracks.length) return;
+        if (currentIndex === -1) {
+          loadTrack(0, true);
+          return;
+        }
+        playNext();
+      });
+
+      audio.addEventListener("timeupdate", () => {
+        if (audio.duration && !isSeeking) {
+          const percent = (audio.currentTime / audio.duration) * 100;
+          progress.value = percent;
+          currentTimeEl.textContent = formatTime(audio.currentTime);
+          durationEl.textContent = formatTime(audio.duration);
+        }
+      });
+
+      audio.addEventListener("loadedmetadata", () => {
+        durationEl.textContent = formatTime(audio.duration);
+      });
+
+      audio.addEventListener("ended", () => {
+        playNext();
+      });
+
+      progress.addEventListener("input", () => {
+        isSeeking = true;
+      });
+
+      progress.addEventListener("change", () => {
+        if (audio.duration) {
+          const newTime = (progress.value / 100) * audio.duration;
+          audio.currentTime = newTime;
+          currentTimeEl.textContent = formatTime(newTime);
+        }
+        isSeeking = false;
+      });
+
+      volumeSlider.addEventListener("input", () => {
+        const v = parseFloat(volumeSlider.value);
+        audio.volume = v;
+        if (v === 0) volumeIcon.textContent = "🔇";
+        else if (v < 0.35) volumeIcon.textContent = "🔈";
+        else if (v < 0.7) volumeIcon.textContent = "🔉";
+        else volumeIcon.textContent = "🔊";
+      });
+
+      modeBtn.addEventListener("click", () => {
+        if (loopMode === "list") loopMode = "single";
+        else if (loopMode === "single") loopMode = "none";
+        else loopMode = "list";
+
+        const t = i18n[currentLang];
+        if (loopMode === "list") {
+          modeIcon.textContent = "🔁";
+          modeText.textContent = t.modeList;
+        } else if (loopMode === "single") {
+          modeIcon.textContent = "🔂";
+          modeText.textContent = t.modeSingle;
+        } else {
+          modeIcon.textContent = "⏹";
+          modeText.textContent = t.modeNone;
+        }
+      });
+
+      shuffleBtn.addEventListener("click", () => {
+        shuffleMode = !shuffleMode;
+        const t = i18n[currentLang];
+        shuffleText.textContent = shuffleMode ? t.shuffleOn : t.shuffleOff;
+        if (shuffleMode && tracks.length) {
+          updateShuffleOrder();
+        }
+      });
+
+      (async function init() {
+        setLang(currentLang);
+        audio.volume = parseFloat(volumeSlider.value);
+
+        try {
+          await openDB();
+          const dbTracks = await getAllTracksFromDB();
+          tracks = dbTracks || [];
+          setLang(currentLang);
+          updatePlaylistUI();
+          if (tracks.length) {
+            loadTrack(0, false);
+          }
+        } catch (e) {
+          console.warn("IndexedDB unavailable, persistent library disabled.", e);
+        }
+      })();
+    })();
+  </script>
+</body>
+</html>
