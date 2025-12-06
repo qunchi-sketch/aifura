@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Aifura – AI-generated apps for everyone</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta
+    name="description"
+    content="Aifura is an app platform for the AI era. Discover AI-generated apps that are lightweight, easy to use and instantly helpful — from PDFs and spreadsheets to everyday workflows."
+  />
+  <link rel="canonical" href="https://www.aifura.com/" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Aifura – AI-generated apps for everyone" />
+  <meta
+    property="og:description"
+    content="Discover AI-generated apps designed to be simple, fast and useful. Explore tools for PDFs, Excel, images and more."
+  />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.aifura.com/" />
+  <meta property="og:image" content="https://www.aifura.com/og-image.png" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="site-wrapper">
+    <!-- Header -->
+    <header class="header">
+      <div class="container header-inner">
+        <a href="index.html" class="brand">
+          <div class="brand-logo"></div>
+          <div>
+            <div class="brand-text-main">Aifura</div>
+            <div class="brand-text-sub">AI-generated apps for everyonea</div>
+          </div>
+        </a>
+
+        <nav class="nav">
+          <a href="index.html">Browse</a>
+          <a href="upload.html">Upload</a>
+          <a href="about.html">About</a>
+        </nav>
+
+        <div class="header-actions">
+          <div class="header-search">
+            <input id="header-search-input" type="text" placeholder="Search apps..." />
+            <span class="header-search-icon">⌕</span>
+          </div>
+          <a href="upload.html" class="btn btn-outline btn-xs">Upload AIPP</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main -->
+    <main>
+      <div class="container">
+        <!-- Hero -->
+        <section class="hero">
+          <div class="hero-grid">
+            <!-- Left: Copy + Search -->
+            <div>
+              <div class="hero-label">
+                <span class="hero-label-dot"></span>
+                Platform for AI-generated apps
+              </div>
+              <h1 class="hero-title">
+                AI-generated apps for everyone, <span>simple, fast and ready when you are.</span>
+              </h1>
+              <p class="hero-subtitle">
+                Aifura is where you discover AI-generated apps designed to be lightweight, easy to use and instantly helpful — from PDFs and spreadsheets to everyday workflows.
+              </p>
+
+              <div class="hero-search-block">
+                <div class="hero-search-row">
+                  <div class="hero-search-input-wrap">
+                    <input
+                      id="hero-search-input"
+                      type="text"
+                      placeholder="Search: pdf, excel, image, merge, split..."
+                    />
+                    <span class="hero-search-icon">⌕</span>
+                  </div>
+                  <button id="hero-search-btn" class="btn btn-primary">
+                    Search AIPPs
+                  </button>
+                  <a href="upload.html" class="btn btn-outline">
+                    + Upload your AIPP
+                  </a>
+                </div>
+
+                <div class="sort-row">
+                  <span class="sort-label">Sort by:</span>
+                  <select id="sort-select" class="sort-select">
+                    <option value="heat">Trending</option>
+                    <option value="stars">Top rated</option>
+                    <option value="date">Newest</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+          <!-- Right column: definition + value -->
+<div class="hero-right">
+
+  <!-- 原本的 What is AIPP 卡片 -->
+  <aside class="hero-panel">
+    <div class="hero-panel-title">What is an AIPP?</div>
+    <ul class="hero-panel-list">
+      <li>• Small, practical apps created with the help of AI</li>
+      <li>• Run instantly in your browser, with no installation</li>
+      <li>• Easy to use and easy to share</li>
+      <li>• Built for people today and AI workflows tomorrow</li>
+    </ul>
+    <div style="margin-top: 12px; font-size: 11px; color: #9ca3af;">
+      More useful tools at <strong>aifura.com</strong>.
+    </div>
+  </aside>
+
+  <!-- 价值主张卡片 -->
+  <aside class="aipp-values-panel">
+    <h3>Why AIPPs matter</h3>
+
+    <p><strong>Made by everyone, made for everyone.</strong><br>
+      AIPPs are created by people and enhanced by AI — small, practical apps anyone can build and share.
+      Aifura is an open platform where creators, professionals and everyday users contribute useful tools
+      that help others instantly.
+    </p>
+
+    <p><strong>Local-first. Private by design.</strong><br>
+      Most AIPPs run entirely in your browser with no server processing.
+      Your files never leave your device — all data stays local, secure and private.
+      Perfect for personal workflows and sensitive documents.
+    </p>
+  </aside>
+  </div>
+</section>
+        <!-- List -->
+        <section>
+          <div class="section-header">
+            <div>
+              <div class="section-title">Latest AIPPs</div>
+              <div class="section-subtitle">
+                AI-generated apps that do the work for you. Click into details to see how each one works and start using it.
+              </div>
+            </div>
+            <div class="section-subtitle">
+              Created by Qun · AI-generated apps for everyone
+            </div>
+          </div>
+
+          <div id="app-list" class="app-grid">
+            <!-- Cards rendered by main.js -->
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container footer-inner">
+        <div>
+          <div>© 2025 Aifura.com</div>
+          <div>AI-generated apps for everyone.</div>
+        </div>
+        <div class="footer-links">
+          <a href="index.html">Browse</a>
+          <a href="upload.html">Upload</a>
+          <a href="mailto:hello@aifura.com">Contact</a>
+        </div>
+        <div class="footer-cn">
+          More tools at aifura.com
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Keep your existing JS -->
+  <script src="main.js"></script>
+</body>
+</html>
