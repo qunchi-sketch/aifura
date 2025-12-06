@@ -2,35 +2,68 @@
 <html lang="en">
 <head>
   <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-2L2QE301LP"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2L2QE301LP"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-2L2QE301LP');
+  </script>
 
-  gtag('config', 'G-2L2QE301LP');
-</script>
   <meta charset="UTF-8" />
   <title>Aifura – AI-generated apps for everyone</title>
+
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="index,follow" />
+
   <meta
     name="description"
-    content="Aifura is an app platform for the AI era. Discover AI-generated apps that are lightweight, easy to use and instantly helpful — from PDFs and spreadsheets to everyday workflows."
+    content="Aifura is a platform for AI-generated micro apps. Make and share by everyone. Discover lightweight browser tools for PDF, Excel, images and everyday workflows — simple, fast and ready to use."
   />
-  <link rel="canonical" href="https://www.aifura.com/" />
 
-  <!-- Open Graph -->
-  <meta property="og:title" content="Aifura – AI-generated apps for everyone" />
+  <link rel="canonical" href="https://aifura.com/" />
+
+  <!-- Open Graph for social sharing -->
+  <meta property="og:title" content="Aifura – AI-generated micro apps for everyone" />
   <meta
     property="og:description"
-    content="Discover AI-generated apps designed to be simple, fast and useful. Explore tools for PDFs, Excel, images and more."
+    content="Discover AI-generated micro apps designed to be simple, fast and useful. Explore tools for PDFs, Excel, images and more."
   />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://www.aifura.com/" />
-  <meta property="og:image" content="https://www.aifura.com/og-image.png" />
+  <meta property="og:url" content="https://aifura.com/" />
+  <meta property="og:site_name" content="Aifura" />
+  <!-- 如果你暂时还没有 og-image.png，可以先注释掉这一行或尽快上传对应图片 -->
+  <meta property="og:image" content="https://aifura.com/og-image.png" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Aifura – AI-generated micro apps for everyone" />
+  <meta
+    name="twitter:description"
+    content="Discover AI-generated micro apps for PDFs, Excel, images and more. Lightweight tools that run locally and instantly in your browser."
+  />
+  <meta name="twitter:image" content="https://aifura.com/og-image.png" />
+
+  <!-- Structured Data: WebSite + SearchAction -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Aifura",
+    "url": "https://aifura.com/",
+    "description": "Aifura is a platform for AI-generated micro apps that run in your browser.",
+    "inLanguage": "en",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://aifura.com/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
 
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
   <div class="site-wrapper">
     <!-- Header -->
@@ -40,7 +73,7 @@
           <div class="brand-logo"></div>
           <div>
             <div class="brand-text-main">Aifura</div>
-            <div class="brand-text-sub">AI-generated apps for everyonea</div>
+            <div class="brand-text-sub">AI-generated apps for everyone</div>
           </div>
         </a>
 
@@ -187,4 +220,5 @@
   <script src="main.js"></script>
 </body>
 </html>
+
 
