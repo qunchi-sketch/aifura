@@ -3,135 +3,370 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 智能抠图</title>
+    <title id="pageTitle">AI 智能一键抠图 - Aifura Tools</title>
+    
+    <meta name="description" content="免费在线AI抠图工具，一键自动去除图片背景，生成透明PNG。Free AI Background Remover, remove backgrounds instantly.">
+    <meta name="keywords" content="AI抠图, 去背景, 在线抠图, background remover, transparent background, AI tools, Aifura">
+    <meta name="author" content="Aifura">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="AI 智能一键抠图 - Free Background Remover">
+    <meta property="og:description" content="上传图片，一键自动扣除背景，高清无损。">
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Aifura AI Background Remover",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "AI-powered tool to remove image backgrounds automatically."
+    }
+    </script>
+
     <style>
-        body { font-family: -apple-system, sans-serif; background: #f0f4f8; }
+        body { font-family: 'Inter', 'Noto Sans SC', sans-serif; }
+        /* 透明背景的棋盘格样式 */
         .checkerboard {
-            background-image: linear-gradient(45deg, #e2e8f0 25%, transparent 25%), linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e2e8f0 75%), linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+            background-image: linear-gradient(45deg, #e2e8f0 25%, transparent 25%), 
+                              linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), 
+                              linear-gradient(45deg, transparent 75%, #e2e8f0 75%), 
+                              linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
             background-size: 20px 20px;
             background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
         }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center py-12 px-4">
+<body class="bg-slate-50 min-h-screen flex flex-col text-slate-800">
 
-    <nav class="w-full max-w-4xl flex justify-between items-center mb-8">
-        <div class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">A</div>
-            <span class="font-bold text-xl text-slate-800">Aifura Tools</span>
+    <nav class="w-full bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.href='https://aifura.com'">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold shadow-md">
+                    Ai
+                </div>
+                <span class="font-bold text-xl tracking-tight">Aifura Tools</span>
+            </div>
+            
+            <button id="langToggle" class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-300 hover:bg-slate-100 transition text-sm font-medium">
+                <span class="text-lg">🌐</span>
+                <span id="currentLang">English</span>
+            </button>
         </div>
-        <a href="/" class="text-slate-500 hover:text-blue-600 font-medium">← 返回首页</a>
     </nav>
 
-    <div class="bg-white w-full max-w-4xl rounded-3xl shadow-xl overflow-hidden p-8 md:p-12">
-        <div class="text-center mb-10">
-            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">AI 智能一键抠图</h1>
-            <p class="text-slate-500 mb-6">强制官方源加载 - 修复下载失败问题</p>
-            <div class="flex justify-center gap-3">
-                <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">🚀 官方线路</span>
-                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">🔒 本地隐私</span>
-            </div>
+    <main class="flex-grow flex flex-col items-center justify-center py-12 px-4 w-full max-w-5xl mx-auto">
+        
+        <div class="text-center mb-10 max-w-2xl">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 pb-2" data-i18n="title">
+                AI 智能一键抠图
+            </h1>
+            <p class="text-lg text-slate-500" data-i18n="subtitle">
+                上传图片，3秒内自动去除背景，发丝级精细处理。
+            </p>
         </div>
 
-        <div id="uploadArea" class="border-2 border-dashed border-slate-300 rounded-2xl bg-slate-50 p-12 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition group">
-            <input type="file" id="fileInput" accept="image/*" class="hidden">
-            <div class="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition">
-                <svg class="w-8 h-8 text-slate-400 group-hover:text-blue-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        <div class="bg-white w-full rounded-3xl shadow-xl overflow-hidden border border-slate-100">
+            
+            <div class="p-8 md:p-12">
+                <div id="uploadArea" class="relative group border-2 border-dashed border-slate-300 rounded-2xl bg-slate-50 p-10 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50/50 transition-all duration-300">
+                    <input type="file" id="fileInput" accept="image/png, image/jpeg, image/jpg, image/webp" class="hidden">
+                    
+                    <div class="w-20 h-20 bg-white rounded-full shadow-sm flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition duration-300">
+                        <svg class="w-10 h-10 text-slate-400 group-hover:text-blue-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-700 mb-2" data-i18n="dragText">点击或拖拽图片到这里</h3>
+                    <p class="text-sm text-slate-400" data-i18n="supportText">支持 JPG, PNG, WEBP (最大 10MB)</p>
+                </div>
+
+                <div id="loadingState" class="hidden mt-8 text-center">
+                    <div class="w-full bg-slate-100 rounded-full h-2.5 mb-4 overflow-hidden">
+                        <div class="bg-blue-600 h-2.5 rounded-full animate-progress" style="width: 60%"></div>
+                    </div>
+                    <p class="text-blue-600 font-medium animate-pulse" data-i18n="processing">正在 AI 处理中，请稍候...</p>
+                </div>
+
+                <div id="errorState" class="hidden mt-6 p-4 bg-red-50 text-red-700 rounded-xl border border-red-100 flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span id="errorText">出错了</span>
+                </div>
             </div>
-            <p class="text-lg font-bold text-slate-700 mb-1">点击或拖拽图片到这里</p>
+
+            <div id="resultArea" class="hidden border-t border-slate-100 bg-slate-50 p-8 md:p-12">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider" data-i18n="original">原图</span>
+                            <span class="text-xs text-slate-400" id="fileSize"></span>
+                        </div>
+                        <div class="h-64 md:h-80 flex items-center justify-center bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                            <img id="imgOriginal" class="max-w-full max-h-full object-contain">
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <span class="text-xs font-bold text-blue-500 uppercase tracking-wider flex items-center gap-1">
+                            ✨ <span data-i18n="result">去背结果</span>
+                        </span>
+                        <div class="h-64 md:h-80 flex items-center justify-center checkerboard rounded-xl border-2 border-blue-100 overflow-hidden shadow-sm relative group">
+                            <img id="imgResult" class="max-w-full max-h-full object-contain z-10">
+                            <div class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition flex items-center justify-center z-0 pointer-events-none"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex flex-col md:flex-row gap-4 justify-center">
+                    <button id="resetBtn" class="px-6 py-3 rounded-xl border border-slate-300 text-slate-600 font-semibold hover:bg-slate-100 transition" data-i18n="tryAnother">
+                        试另一张
+                    </button>
+                    <a id="downloadBtn" class="flex-1 md:flex-none md:w-64 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-center hover:shadow-lg hover:shadow-blue-500/30 transition transform active:scale-95 flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span data-i18n="download">下载透明 PNG</span>
+                    </a>
+                </div>
+            </div>
+
         </div>
 
-        <button id="processBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl mt-8 transition disabled:opacity-50 disabled:cursor-not-allowed hidden">
-            开始一键抠图
-        </button>
-        <p id="status" class="text-center mt-4 text-blue-600 font-medium min-h-[24px]"></p>
+    </main>
 
-        <div id="resultArea" class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10 hidden">
-            <div class="bg-slate-50 p-4 rounded-xl">
-                <p class="text-xs font-bold text-slate-400 uppercase mb-3">原图</p>
-                <div class="h-64 flex items-center justify-center bg-white rounded-lg border border-slate-200 overflow-hidden">
-                    <img id="imgOriginal" class="max-w-full max-h-full object-contain">
-                </div>
-            </div>
-            <div class="bg-slate-50 p-4 rounded-xl">
-                <p class="text-xs font-bold text-slate-400 uppercase mb-3">结果</p>
-                <div class="h-64 flex items-center justify-center checkerboard rounded-lg border border-slate-200 overflow-hidden">
-                    <img id="imgResult" class="max-w-full max-h-full object-contain">
-                </div>
-                <a id="downloadBtn" class="block w-full text-center bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg mt-4 transition shadow-lg shadow-green-500/30">
-                    下载透明 PNG
+    <footer class="w-full bg-slate-900 text-slate-300 py-8 text-center">
+        <div class="max-w-6xl mx-auto px-4">
+            <p class="mb-2 font-medium">Made with ❤️ by Aifura</p>
+            <p class="text-sm opacity-80 hover:opacity-100 transition">
+                <span data-i18n="footerText">更多好用 AI 生成工具请访问：</span> 
+                <a href="https://aifura.com" target="_blank" class="text-blue-400 hover:text-blue-300 font-bold underline decoration-blue-400/30 hover:decoration-blue-300">
+                    aifura.com
                 </a>
-            </div>
+            </p>
+            <p class="text-xs text-slate-600 mt-4">&copy; 2025 Aifura Tools. All rights reserved.</p>
         </div>
-    </div>
+    </footer>
 
-    <script type="module">
-        // 1. 依然使用 esm.sh 引入核心逻辑 (这个文件很小，不会报错)
-        import imglyRemoveBackground from 'https://esm.sh/@imgly/background-removal@1.3.0';
+    <script>
+        // ================= 配置区 =================
+        // 【关键】这里填写你刚刚在 Cloudflare 部署的 Worker 地址
+        const WORKER_URL = "https://my-ai-remover.qunchi1995.workers.dev";
+        // =========================================
 
-        const fileInput = document.getElementById('fileInput');
-        const uploadArea = document.getElementById('uploadArea');
-        const processBtn = document.getElementById('processBtn');
-        const status = document.getElementById('status');
-        const resultArea = document.getElementById('resultArea');
-        const imgOriginal = document.getElementById('imgOriginal');
-        const imgResult = document.getElementById('imgResult');
-        const downloadBtn = document.getElementById('downloadBtn');
+        // 语言包
+        const translations = {
+            zh: {
+                title: "AI 智能一键抠图",
+                subtitle: "上传图片，3秒内自动去除背景，发丝级精细处理。",
+                dragText: "点击或拖拽图片到这里",
+                supportText: "支持 JPG, PNG, WEBP (最大 10MB)",
+                processing: "正在 AI 处理中，请稍候...",
+                original: "原图",
+                result: "去背结果",
+                tryAnother: "试另一张",
+                download: "下载透明 PNG",
+                footerText: "更多好用 AI 生成工具请访问：",
+                langBtn: "English",
+                errorMax: "图片过大，请上传 10MB 以内的图片"
+            },
+            en: {
+                title: "AI Background Remover",
+                subtitle: "Remove image backgrounds instantly with AI. High precision.",
+                dragText: "Click or Drag Image Here",
+                supportText: "Supports JPG, PNG, WEBP (Max 10MB)",
+                processing: "AI is processing, please wait...",
+                original: "Original",
+                result: "Result",
+                tryAnother: "Try Another",
+                download: "Download PNG",
+                footerText: "More useful AI tools visit:",
+                langBtn: "中文",
+                errorMax: "Image too large, please upload under 10MB"
+            }
+        };
 
-        let selectedFile = null;
+        // 状态变量
+        let currentLang = 'zh';
+        let isProcessing = false;
 
-        uploadArea.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', (e) => { if(e.target.files[0]) handleFile(e.target.files[0]) });
+        // DOM 元素
+        const $ = (id) => document.getElementById(id);
+        const els = {
+            fileInput: $('fileInput'),
+            uploadArea: $('uploadArea'),
+            loadingState: $('loadingState'),
+            resultArea: $('resultArea'),
+            imgOriginal: $('imgOriginal'),
+            imgResult: $('imgResult'),
+            downloadBtn: $('downloadBtn'),
+            errorState: $('errorState'),
+            errorText: $('errorText'),
+            resetBtn: $('resetBtn'),
+            langToggle: $('langToggle'),
+            currentLangText: $('currentLang')
+        };
 
-        function handleFile(file) {
-            selectedFile = file;
-            imgOriginal.src = URL.createObjectURL(file);
-            status.textContent = `已选文件: ${file.name}`;
-            processBtn.classList.remove('hidden');
-            processBtn.disabled = false;
-            resultArea.classList.add('hidden');
+        // 初始化
+        function init() {
+            // 绑定上传事件
+            els.uploadArea.addEventListener('click', () => els.fileInput.click());
+            els.fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+            
+            // 绑定拖拽事件
+            els.uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                els.uploadArea.classList.add('border-blue-500', 'bg-blue-50');
+            });
+            els.uploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                els.uploadArea.classList.remove('border-blue-500', 'bg-blue-50');
+            });
+            els.uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                els.uploadArea.classList.remove('border-blue-500', 'bg-blue-50');
+                if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+            });
+
+            // 绑定粘贴事件
+            document.addEventListener('paste', (e) => {
+                const items = e.clipboardData.items;
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.indexOf('image') !== -1) {
+                        const file = items[i].getAsFile();
+                        handleFile(file);
+                        break;
+                    }
+                }
+            });
+
+            // 按钮事件
+            els.resetBtn.addEventListener('click', resetUI);
+            els.langToggle.addEventListener('click', toggleLanguage);
         }
 
-        processBtn.addEventListener('click', async () => {
-            if (!selectedFile) return;
-            processBtn.disabled = true;
-            status.textContent = "🚀 正在连接官方资源库 (首次约20秒)...";
+        // 文件处理主逻辑
+        async function handleFile(file) {
+            if (!file || isProcessing) return;
             
+            // 简单的验证
+            if (file.size > 10 * 1024 * 1024) {
+                showError(translations[currentLang].errorMax);
+                return;
+            }
+
+            // 重置状态
+            resetUI(false);
+            isProcessing = true;
+            
+            // 显示本地预览
+            els.imgOriginal.src = URL.createObjectURL(file);
+            $('fileSize').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+            
+            // UI 切换到加载中
+            els.uploadArea.classList.add('hidden');
+            els.loadingState.classList.remove('hidden');
+
             try {
-                // 2. 关键配置：强制 publicPath 指向 staticimgly.com
-                // 这样它就不会去你本地找那些下载失败的文件，也不会走被墙的 jsdelivr
-                const blob = await imglyRemoveBackground(selectedFile, {
-                    publicPath: 'https://staticimgly.com/@imgly/background-removal-data/1.3.0/dist/',
-                    progress: (key, current, total) => {
-                        const percent = Math.round((current / total) * 100);
-                        if(key.includes('fetch')) {
-                             status.textContent = `⬇️ 下载 AI 组件: ${percent}%`;
-                        }
-                    }
+                // 1. 准备数据
+                const formData = new FormData();
+                formData.append('image', file);
+
+                // 2. 发送请求给你的 Cloudflare Worker
+                const response = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    body: formData
                 });
+
+                if (!response.ok) {
+                    throw new Error(`Server Error: ${response.statusText}`);
+                }
+
+                // 3. 处理结果
+                const blob = await response.blob();
+                const resultUrl = URL.createObjectURL(blob);
+
+                // 4. 显示结果
+                els.imgResult.src = resultUrl;
+                els.downloadBtn.href = resultUrl;
+                els.downloadBtn.download = `aifura_cut_${Date.now()}.png`;
                 
-                const url = URL.createObjectURL(blob);
-                imgResult.src = url;
-                downloadBtn.href = url;
-                downloadBtn.download = "aifura_cut_" + selectedFile.name;
-                
-                resultArea.classList.remove('hidden');
-                status.textContent = "✨ 处理成功！";
-                status.className = "text-center mt-4 text-green-600 font-medium";
-                
+                els.loadingState.classList.add('hidden');
+                els.resultArea.classList.remove('hidden');
+
             } catch (error) {
                 console.error(error);
-                status.textContent = "❌ 错误: " + error.message;
-                status.className = "text-center mt-4 text-red-600 font-medium";
-                // 如果还报错，大概率是 SharedArrayBuffer 问题
-                if(error.message.includes('SharedArrayBuffer')) {
-                     alert("提示：由于 _headers 已删除，浏览器可能限制了性能，请多试一次。");
-                }
+                showError("API Error: " + error.message + " (Please check your Worker)");
+                els.loadingState.classList.add('hidden');
+                els.uploadArea.classList.remove('hidden');
             } finally {
-                processBtn.disabled = false;
+                isProcessing = false;
             }
-        });
+        }
+
+        function resetUI(clearFile = true) {
+            els.resultArea.classList.add('hidden');
+            els.errorState.classList.add('hidden');
+            els.loadingState.classList.add('hidden');
+            els.uploadArea.classList.remove('hidden');
+            if(clearFile) els.fileInput.value = '';
+        }
+
+        function showError(msg) {
+            els.errorText.textContent = msg;
+            els.errorState.classList.remove('hidden');
+        }
+
+        // 语言切换逻辑
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            updateTexts();
+        }
+
+        function updateTexts() {
+            const t = translations[currentLang];
+            
+            // 更新带有 data-i18n 的元素
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t[key]) el.textContent = t[key];
+            });
+
+            // 更新特定按钮文本
+            els.currentLangText.textContent = t.langBtn;
+            
+            // 更新页面标题
+            document.title = t.title + " - Aifura Tools";
+            document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+        }
+
+        // 启动
+        init();
+        
+        // CSS 动画补充
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = `
+            @keyframes progress {
+                0% { width: 0%; }
+                50% { width: 70%; }
+                100% { width: 95%; }
+            }
+            .animate-progress {
+                animation: progress 2s ease-in-out infinite;
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
     </script>
 </body>
 </html>
