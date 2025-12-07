@@ -674,53 +674,47 @@ input[type="file"] {
   gap: 18px;
 }
 /* ==========
-   Updated Card Styles (With Author)
+/* ==========
+   Card Author & Meta Refinements
+   优化：作者信息下沉，Contact 按钮美化
 ========== */
 
-/* 让卡片顶部的一排东西（HTML标签 和 作者）左右对齐 */
-.app-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-/* 作者栏样式 */
-.app-card-author {
-  font-size: 11px;
-  color: #6b7280;
+/* 1. 优化 Meta 行：确保垂直居中，增加顶部间距 */
+.app-card-meta {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 6px;
-}
-
-/* 作者名字加一点高亮，表示尊重 */
-.app-card-author span {
+  font-size: 11px;
   color: #9ca3af;
+  margin-top: 8px; /* 关键：给上面的描述留点呼吸空间 */
 }
 
-/* Contact 链接样式 */
+/* 2. 美化 Contact 按钮：平时是灰色边框，鼠标放上去变蓝 */
 .author-contact-link {
-  color: #4a6bff;
   text-decoration: none;
-  background: rgba(74, 107, 255, 0.1);
+  font-size: 10px;
+  color: #9ca3af;
+  border: 1px solid rgba(148, 163, 184, 0.3);
   padding: 1px 6px;
   border-radius: 4px;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  margin-left: 4px;
 }
 
 .author-contact-link:hover {
-  background: rgba(74, 107, 255, 0.2);
-  color: #60a5fa;
+  border-color: #4a6bff;
+  color: #4a6bff;
+  background: rgba(74, 107, 255, 0.1);
 }
 
-/* 顺便优化一下卡片，让按钮永远沉底 */
+/* 3. 顺便优化一下卡片，确保按钮永远沉底 */
+/* 这就是替代你刚才问的那段代码 */
 .app-card {
-  /* 之前的样式应该已有 flex-direction: column */
-  /* 确保卡片高度被撑开，按钮在最下面 */
   height: 100%; 
   min-height: 200px;
 }
+
 /* ==========
    New Upload Page Styles (Google Form + Email)
    补充：用于美化 Google 表单和邮件投稿的双入口布局
@@ -752,7 +746,6 @@ input[type="file"] {
   margin-bottom: 30px;
 }
 
-/* 确保每一行之间有点空隙，阅读更舒服 */
 .guide-list li {
   margin-bottom: 12px;
 }
