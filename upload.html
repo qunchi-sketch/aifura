@@ -4,21 +4,7 @@
   <meta charset="UTF-8" />
   <title>Upload AIPP – Aifura</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta
-    name="description"
-    content="Upload your AI-generated app (AIPP) to Aifura and share lightweight, focused tools with users in the AI era."
-  />
-  <link rel="canonical" href="https://www.aifura.com/upload.html" />
-
-  <meta property="og:title" content="Upload AIPP – Aifura" />
-  <meta
-    property="og:description"
-    content="Share your AI-generated apps (AIPPs) with the Aifura community."
-  />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://www.aifura.com/upload.html" />
-  <meta property="og:image" content="https://www.aifura.com/og-image.png" />
-
+  <meta name="description" content="Upload your AI-generated app to Aifura." />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -29,14 +15,14 @@
           <div class="brand-logo"></div>
           <div>
             <div class="brand-text-main">Aifura</div>
-            <div class="brand-text-sub">AI-generated apps for everyone</div>
+            <div class="brand-text-sub" data-i18n="brandSub">AI-generated apps for everyone</div>
           </div>
         </a>
 
         <nav class="nav">
-          <a href="index.html">Browse</a>
-          <a href="upload.html">Upload</a>
-          <a href="about.html">About</a>
+          <a href="index.html" data-i18n="navBrowse">Browse</a>
+          <a href="upload.html" data-i18n="navUpload">Upload</a>
+          <a href="about.html" data-i18n="navAbout">About</a>
         </nav>
 
         <div class="header-actions">
@@ -44,6 +30,9 @@
             <input id="header-search-input" type="text" placeholder="Search apps..." />
             <span class="header-search-icon">⌕</span>
           </div>
+          <button id="lang-toggle" class="btn btn-outline btn-xs" style="min-width: 32px; font-weight:bold;">
+            中
+          </button>
         </div>
       </div>
     </header>
@@ -51,22 +40,22 @@
     <main>
       <div class="container">
         <section class="upload-wrapper">
-          <h1 class="page-title">Submit your AIPP</h1>
-          <p class="page-subtitle">
+          <h1 class="page-title" data-i18n="uploadTitle">Submit your AIPP</h1>
+          <p class="page-subtitle" data-i18n="uploadSubtitle">
             Join the "Made by everyone" movement. Currently, we review every submission manually to ensure safety and quality.
           </p>
 
           <div class="form-card upload-guide-card">
-            <div class="guide-title">How to upload?</div>
+            <div class="guide-title" data-i18n="uploadGuideTitle">How to upload?</div>
             <ol class="guide-list">
-              <li><strong>Prepare your file:</strong> Ensure your AIPP works locally.</li>
-              <li><strong>Choose a method:</strong> Use the form (recommended) or send us an email.</li>
-              <li><strong>Wait for approval:</strong> We usually review and publish new tools within 24 hours.</li>
+              <li data-i18n="uploadList1"><strong>Prepare your file:</strong> Ensure your AIPP works locally.</li>
+              <li data-i18n="uploadList2"><strong>Choose a method:</strong> Use the form (recommended) or send us an email.</li>
+              <li data-i18n="uploadList3"><strong>Wait for approval:</strong> We usually review and publish new tools within 24 hours.</li>
             </ol>
 
             <div class="upload-action-row" style="display: flex; flex-direction: column; gap: 16px; align-items: center;">
               
-              <a href="https://docs.google.com/forms/d/e/1FAIpQLSeHRgO9DqhrIM08eeHCVvUgyanwtmqhEw_pe-bMXxzKpsBGlQ/viewform?usp=dialog" target="_blank" class="btn btn-primary btn-large" style="width: 100%; max-width: 320px;">
+              <a href="https://docs.google.com/forms/d/e/1FAIpQLSeHRgO9DqhrIM08eeHCVvUgyanwtmqhEw_pe-bMXxzKpsBGlQ/viewform?usp=dialog" target="_blank" class="btn btn-primary btn-large" style="width: 100%; max-width: 320px;" data-i18n="uploadBtnForm">
                 Fill out Google Form
               </a>
 
@@ -75,17 +64,17 @@
                 <div style="position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.1); z-index: 0;"></div>
               </div>
 
-              <a href="mailto:chiqun1995@foxmail.com?subject=AIPP Submission&body=Hi Qun,%0A%0AHere is my AIPP submission.%0A%0ATitle:%0ADescription:%0ATags:%0A%0A(Please attach your .html file to this email)" class="btn btn-outline btn-large" style="width: 100%; max-width: 320px;">
+              <a href="mailto:chiqun1995@foxmail.com?subject=AIPP Submission&body=Hi Qun,%0A%0AHere is my AIPP submission.%0A%0ATitle:%0ADescription:%0ATags:%0A%0A(Please attach your .html file to this email)" class="btn btn-outline btn-large" style="width: 100%; max-width: 320px;" data-i18n="uploadBtnEmail">
                 Submit via Email
               </a>
-              <div style="font-size: 11px; color: #6b7280; margin-top: -8px;">
+              <div style="font-size: 11px; color: #6b7280; margin-top: -8px;" data-i18n="uploadEmailNote">
                 Sent to chiqun1995@foxmail.com
               </div>
               
             </div>
           </div>
 
-          <div class="upload-legal-note">
+          <div class="upload-legal-note" data-i18n="uploadLegal">
             By submitting, you represent that you have the right to share this tool, 
             and you agree to license it for free use on Aifura. 
             We reserve the right to decline tools that are unsafe or low quality.
@@ -98,20 +87,20 @@
       <div class="container footer-inner">
         <div>
           <div>© 2025 Aifura.com</div>
-          <div>AI-generated apps for everyone.</div>
+          <div data-i18n="footerText">AI-generated apps for everyone.</div>
         </div>
         <div class="footer-links">
-          <a href="index.html">Browse</a>
-          <a href="upload.html">Upload</a>
+          <a href="index.html" data-i18n="navBrowse">Browse</a>
+          <a href="upload.html" data-i18n="navUpload">Upload</a>
           <a href="mailto:chiqun1995@foxmail.com">Contact</a>
         </div>
-        <div class="footer-cn">
+        <div class="footer-cn" data-i18n="footerLinks">
           Made with ❤️ by Qun & AI
         </div>
       </div>
     </footer>
   </div>
+  
+  <script src="main.js?v=2.1"></script>
 </body>
 </html>
-
-
