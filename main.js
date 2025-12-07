@@ -55,18 +55,16 @@ function renderCards(list) {
 
     // 处理作者和联系方式
     const authorName = escapeHtml(app.author || "Anonymous");
-    // 如果有联系方式，显示一个小图标或文字链接；如果没有，就不显示链接
     const contactLink = app.contact 
       ? `<a href="${app.contact}" target="_blank" class="author-contact-link">Contact</a>` 
       : "";
 
+    // 修改了这里：
+    // 1. 删除了 header 里的作者信息
+    // 2. 将作者信息移动到了 app-card-meta 中
     card.innerHTML = `
       <div class="app-card-header">
         <div class="app-card-badge">HTML</div>
-        <div class="app-card-author">
-          <span>By ${authorName}</span>
-          ${contactLink}
-        </div>
       </div>
 
       <div class="app-card-title">${escapeHtml(app.title || "Untitled AIPP")}</div>
@@ -77,6 +75,10 @@ function renderCards(list) {
       <div class="app-card-meta">
         <span>★ ${(app.stars || 0).toString()}</span>
         <span>· Heat ${(app.heat || 0).toString()}</span>
+        
+        <span style="opacity:0.3; margin:0 2px;">|</span>
+        <span>By ${authorName}</span>
+        ${contactLink}
       </div>
       
       <div class="app-card-tags">
@@ -175,4 +177,5 @@ function escapeHtml(str) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 }
+
 
