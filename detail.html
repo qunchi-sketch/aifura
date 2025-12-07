@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-2L2QE301LP"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2L2QE301LP"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
@@ -13,40 +12,26 @@
   <meta charset="UTF-8" />
   <title>AIPP Detail – Aifura</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta
-    name="description"
-    content="See how this AI-generated app (AIPP) works, what problem it helps with, and start using it in your daily workflow."
-  />
-  <link rel="canonical" href="https://www.aifura.com/detail.html" />
-
-  <meta property="og:title" content="AIPP Detail – Aifura" />
-  <meta
-    property="og:description"
-    content="Learn more about this AI-generated app and how to use it effectively in your day-to-day work."
-  />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://www.aifura.com/detail.html" />
-  <meta property="og:image" content="https://www.aifura.com/og-image.png" />
-
+  <meta name="description" content="See how this AI-generated app works." />
+  
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="site-wrapper">
-    <!-- Header -->
     <header class="header">
       <div class="container header-inner">
         <a href="index.html" class="brand">
           <div class="brand-logo"></div>
           <div>
             <div class="brand-text-main">Aifura</div>
-            <div class="brand-text-sub">AI-generated apps for everyone</div>
+            <div class="brand-text-sub" data-i18n="brandSub">AI-generated apps for everyone</div>
           </div>
         </a>
 
         <nav class="nav">
-          <a href="index.html">Browse</a>
-          <a href="upload.html">Upload</a>
-          <a href="about.html">About</a>
+          <a href="index.html" data-i18n="navBrowse">Browse</a>
+          <a href="upload.html" data-i18n="navUpload">Upload</a>
+          <a href="about.html" data-i18n="navAbout">About</a>
         </nav>
 
         <div class="header-actions">
@@ -54,81 +39,122 @@
             <input id="header-search-input" type="text" placeholder="Search apps..." />
             <span class="header-search-icon">⌕</span>
           </div>
+          <button id="lang-toggle" class="btn btn-outline btn-xs" style="min-width: 32px; font-weight:bold;">
+            中
+          </button>
         </div>
       </div>
     </header>
 
-    <!-- Main -->
     <main>
       <div class="container">
         <section class="detail-header">
-          <div class="detail-tagline">AI-generated app · AIPP</div>
-          <h1 id="detail-title" class="detail-title">AIPP Title Here</h1>
+          <div class="detail-tagline" data-i18n="detailTagline">AI-generated app · AIPP</div>
+          <h1 id="detail-title" class="detail-title">Loading...</h1>
           <div class="detail-meta">
-            <span id="detail-upload-time">Uploaded: 2025-12-01</span>
+            <span id="detail-upload-time"></span>
             <span>·</span>
-            <span id="detail-tags">Tags: pdf, merge</span>
+            <span id="detail-tags"></span>
             <span>·</span>
-            <span id="detail-stars">★ 0 stars</span>
+            <span id="detail-stars"></span>
             <span>·</span>
-            <span id="detail-heat">Heat: 0</span>
+            <span id="detail-heat"></span>
           </div>
         </section>
 
         <section class="detail-body">
           <article class="detail-card">
-            <h3>What this AIPP does</h3>
+            <h3 data-i18n="detailWhat">What this AIPP does</h3>
             <p id="detail-description">
-              This AIPP is an AI-generated app that helps you complete a specific type of task more easily. The actual description is loaded from aipps.json.
-            </p>
+              </p>
             <div style="margin-top: 10px; font-size: 11px; color: #6b7280;">
               Created by Qun · AI-generated apps for everyone.
             </div>
 
             <div style="margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap;">
-              <a id="detail-open-app" href="#" target="_blank" class="btn btn-primary btn-xs">
+              <a id="detail-open-app" href="#" target="_blank" class="btn btn-primary btn-xs" data-i18n="detailBtnOpen">
                 Open AIPP
               </a>
-              <a id="detail-download-app" href="#" class="btn btn-outline btn-xs">
+              <a id="detail-download-app" href="#" class="btn btn-outline btn-xs" data-i18n="detailBtnDown">
                 Download HTML
               </a>
             </div>
           </article>
 
           <aside class="detail-card">
-            <h3>How to use this AIPP</h3>
-            <p id="detail-meta-extra">
+            <h3 data-i18n="detailHow">How to use this AIPP</h3>
+            <p id="detail-meta-extra" data-i18n="detailMetaP">
               • Open the app directly in your browser, no installation required.<br />
               • Follow the on-screen steps to upload files or enter the information it needs.<br />
-              • Use it whenever you want a quick, repeatable way to handle this type of task.<br />
-              • In the future, AIPPs like this can also be combined into larger, AI-driven workflows.
+              • Use it whenever you want a quick, repeatable way to handle this type of task.
             </p>
           </aside>
         </section>
       </div>
     </main>
 
-    <!-- Footer -->
     <footer class="footer">
       <div class="container footer-inner">
         <div>
           <div>© 2025 Aifura.com</div>
-          <div>AI-generated apps for everyone.</div>
+          <div data-i18n="footerText">AI-generated apps for everyone.</div>
         </div>
         <div class="footer-links">
-          <a href="index.html">Browse</a>
-          <a href="upload.html">Upload</a>
+          <a href="index.html" data-i18n="navBrowse">Browse</a>
+          <a href="upload.html" data-i18n="navUpload">Upload</a>
           <a href="mailto:hello@aifura.com">Contact</a>
         </div>
-        <div class="footer-cn">
+        <div class="footer-cn" data-i18n="footerLinks">
           More tools at aifura.com
         </div>
       </div>
     </footer>
   </div>
 
-  <!-- Keep your existing detail logic -->
-  <script src="detail.js"></script>
+  <script src="main.js?v=2.1"></script>
+  
+  <script>
+    // Embedded detail logic adjusted for i18n
+    document.addEventListener("DOMContentLoaded", () => {
+      const params = new URLSearchParams(location.search);
+      const id = params.get("id");
+      const currentLang = localStorage.getItem("aifura_lang") || "en";
+
+      if (!id) return;
+
+      fetch("aipps.json")
+        .then((res) => res.json())
+        .then((data) => {
+          const app = (data || []).find((item) => item.id === id);
+          if (app) renderDetail(app, currentLang);
+        });
+    });
+
+    function renderDetail(app, lang) {
+      const titleEl = document.getElementById("detail-title");
+      const descEl = document.getElementById("detail-description");
+      const timeEl = document.getElementById("detail-upload-time");
+      const tagsEl = document.getElementById("detail-tags");
+      const starsEl = document.getElementById("detail-stars");
+      const heatEl = document.getElementById("detail-heat");
+      const openBtn = document.getElementById("detail-open-app");
+      const downloadBtn = document.getElementById("detail-download-app");
+
+      // 支持中文标题/描述切换
+      const displayTitle = (lang === 'zh' && app.title_cn) ? app.title_cn : app.title;
+      const displayDesc = (lang === 'zh' && app.description_cn) ? app.description_cn : app.description;
+
+      if (titleEl) titleEl.textContent = displayTitle || "Untitled AIPP";
+      if (descEl) descEl.textContent = displayDesc || "";
+      
+      if (timeEl) timeEl.textContent = (app.uploadTime ? new Date(app.uploadTime).toLocaleDateString() : "");
+      if (tagsEl) tagsEl.textContent = (app.tags || []).join(", ");
+      if (starsEl) starsEl.textContent = "★ " + (app.stars || 0);
+      if (heatEl) heatEl.textContent = "Heat: " + (app.heat || 0);
+
+      if (openBtn && app.fileUrl) openBtn.href = app.fileUrl;
+      if (downloadBtn && app.fileUrl) downloadBtn.href = app.fileUrl;
+    }
+  </script>
 </body>
 </html>
-
