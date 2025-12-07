@@ -2,7 +2,9 @@
   {
     "id": "excel-split",
     "title": "Split Excel Sheets into Files",
+    "title_cn": "Excel 多工作表拆分工具",
     "description": "Upload an Excel file and export each sheet as a separate .xlsx file.",
+    "description_cn": "上传一个 Excel 文件，自动将每个工作表（Sheet）拆分导出为独立的 .xlsx 文件。",
     "tags": ["excel", "split", "sheet"],
     "fileUrl": "aipps/excel-split.html",
     "uploadTime": "2025-12-06T00:00:00Z",
@@ -14,7 +16,9 @@
   {
     "id": "pdf-merge",
     "title": "Merge PDFs into One",
+    "title_cn": "PDF 合并工具",
     "description": "Combine multiple PDF files into a single document in your browser.",
+    "description_cn": "在浏览器中直接将多个 PDF 文件合并为一个文档，简单快捷。",
     "tags": ["pdf", "merge"],
     "fileUrl": "aipps/pdf-merge.html",
     "uploadTime": "2025-12-05T12:00:00Z",
@@ -26,7 +30,9 @@
   {
     "id": "local-music-player",
     "title": "Local Music Player",
+    "title_cn": "本地音乐播放器",
     "description": "Import and play your local songs directly in the browser—no app required. Supports background playback, loop modes, shuffle.",
+    "description_cn": "无需安装软件，直接在浏览器中导入并播放本地歌曲。支持后台播放、循环模式和随机播放。",
     "tags": ["Music", "Player"],
     "fileUrl": "aipps/Local-Music-Player.html",
     "uploadTime": "2025-12-05T12:00:00Z",
@@ -38,7 +44,9 @@
   {
     "id": "image-to-pdf",
     "title": "Image to PDF Converter",
+    "title_cn": "图片转 PDF 转换器",
     "description": "Free & Secure Image to PDF Converter. Process files locally in your browser—no uploads required.",
+    "description_cn": "免费且安全的图片转 PDF 工具。所有处理均在浏览器本地完成，无需上传文件，保护隐私。",
     "tags": ["pdf", "Converter"],
     "fileUrl": "aipps/2PDF.html",
     "uploadTime": "2025-12-05T12:00:00Z",
@@ -50,7 +58,9 @@
   {
     "id": "english-reading-tool",
     "title": "English Reading Tool",
+    "title_cn": "英语沉浸式精读工具",
     "description": "Provides a pure intensive reading environment with word highlighting and PDF notes export.",
+    "description_cn": "提供纯净的精读环境，支持单词高亮标记，并可将笔记导出为 PDF。",
     "tags": ["Learning", "english"],
     "fileUrl": "aipps/Englishreadnote.html",
     "uploadTime": "2025-12-05T12:00:00Z",
