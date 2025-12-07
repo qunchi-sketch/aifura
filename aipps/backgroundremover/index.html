@@ -4,48 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>Free AI Background Remover | 免费 AI 智能抠图 - Privacy First | Aifura</title>
+    <title>免费 AI 智能抠图 - 保护隐私 | Aifura</title>
+    <meta name="description" content="最佳的免费在线 AI 抠图工具。完全在浏览器本地运行，保护隐私，无需上传图片。一键去底，无限使用。">
     
-    <meta name="description" content="Best free online AI background remover. Works 100% locally in your browser for maximum privacy. No image upload required. 最佳的免费在线 AI 抠图工具。完全在浏览器本地运行，保护隐私，无需上传图片。一键去底，无限使用。">
-    
-    <meta name="keywords" content="remove background, AI background remover, free photo editor, privacy first AI, transparent background maker, 免费抠图, 在线去底, AI修图, 离线抠图, Aifura">
-    
-    <link rel="canonical" href="https://aifura.com/aipp/remove-bg/" />
-
-    <meta property="og:title" content="Free AI Background Remover - Safe & Unlimited">
-    <meta property="og:description" content="Remove image backgrounds instantly in your browser. No server uploads. 100% Free.">
-    <meta property="og:image" content="https://aifura.com/assets/og-image.jpg"> <meta property="og:url" content="https://aifura.com/aipp/remove-bg/">
-    <meta property="og:type" content="website">
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "Aifura AI Background Remover",
-      "operatingSystem": "Web Browser",
-      "applicationCategory": "DesignApplication",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.9",
-        "ratingCount": "1200"
-      },
-      "description": "A privacy-focused, browser-based AI tool to remove image backgrounds automatically."
-    }
-    </script>
-
     <script src="https://cdn.tailwindcss.com"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
         body { font-family: 'Inter', sans-serif; }
-        
-        /* 透明背景棋盘格效果 */
         .checkerboard {
             background-color: #ffffff;
             background-image: linear-gradient(45deg, #e5e7eb 25%, transparent 25%), 
@@ -55,8 +22,6 @@
             background-size: 20px 20px;
             background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
         }
-
-        /* 动画类 */
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -65,16 +30,16 @@
 
     <nav class="w-full bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.href='https://aifura.com'">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.href='/'">
                 <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">A</div>
                 <span class="font-bold text-xl tracking-tight text-slate-900">Aifura Tools</span>
             </div>
             <div class="flex items-center gap-4">
                 <button id="langToggle" class="text-sm font-semibold text-slate-600 hover:text-blue-600 transition flex items-center gap-1 border border-gray-300 px-3 py-1 rounded-full">
-                    🌐 <span id="currentLangLabel">English</span>
+                    🌐 <span id="currentLangLabel">中文</span>
                 </button>
-                <a href="https://aifura.com" class="hidden sm:block bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition" data-i18n="moreTools">
-                    Explore More AI Apps
+                <a href="/" class="hidden sm:block bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition" data-i18n="moreTools">
+                    发现更多 AI 应用
                 </a>
             </div>
         </div>
@@ -84,15 +49,15 @@
         
         <header class="text-center mb-10 fade-in">
             <h1 class="text-4xl sm:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight" data-i18n="title">
-                AI Background Remover
+                AI 智能一键抠图
             </h1>
             <p class="text-lg text-slate-600 max-w-2xl mx-auto" data-i18n="subtitle">
-                100% Free, Unlimited, and runs entirely in your browser. Your photos never leave your device.
+                完全免费、无限次使用。所有计算在浏览器本地完成，图片绝不上传服务器，隐私绝对安全。
             </p>
             <div class="mt-4 flex flex-wrap justify-center gap-2">
-                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold" data-i18n="tagPrivacy">🔒 Privacy First</span>
-                <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold" data-i18n="tagFree">⚡ Unlimited Free</span>
-                <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold" data-i18n="tagOffline">💻 Offline Capable</span>
+                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold" data-i18n="tagPrivacy">🔒 隐私保护</span>
+                <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold" data-i18n="tagFree">⚡ 免费无限</span>
+                <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold" data-i18n="tagOffline">💻 离线可用</span>
             </div>
         </header>
 
@@ -105,8 +70,8 @@
                         <div class="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 transition">
                             <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         </div>
-                        <p class="text-lg font-medium text-slate-700 mb-2 group-hover:text-blue-600 transition" data-i18n="uploadText">Click or Drag image here</p>
-                        <p class="text-sm text-slate-400" data-i18n="uploadSub">Supports JPG, PNG, WEBP</p>
+                        <p class="text-lg font-medium text-slate-700 mb-2 group-hover:text-blue-600 transition" data-i18n="uploadText">点击或拖拽图片到这里</p>
+                        <p class="text-sm text-slate-400" data-i18n="uploadSub">支持 JPG, PNG, WEBP</p>
                     </div>
                 </div>
             </div>
@@ -120,35 +85,32 @@
                     </div>
                 </div>
                 <button id="processBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 transition transform active:scale-95 flex items-center justify-center gap-2">
-                    <span data-i18n="btnRemove">Remove Background Now</span>
-                    <span class="text-xs opacity-75 font-normal" data-i18n="btnCost">(0 Cost)</span>
+                    <span data-i18n="btnRemove">开始一键抠图</span>
+                    <span class="text-xs opacity-75 font-normal" data-i18n="btnCost">(0 成本)</span>
                 </button>
                 
                 <div id="progressContainer" class="mt-4 hidden text-center">
                      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                     <p id="progressText" class="text-sm text-blue-600 font-medium">Initializing AI...</p>
-                     <p class="text-xs text-slate-400 mt-1" data-i18n="firstTimeHint">First time load may take 30s to download AI model.</p>
+                     <p id="progressText" class="text-sm text-blue-600 font-medium">AI 正在初始化...</p>
+                     <p class="text-xs text-slate-400 mt-1" data-i18n="firstTimeHint">首次使用需要下载 AI 模型 (约80MB)，可能需要30秒，请耐心等待。</p>
                 </div>
             </div>
 
             <div id="resultArea" class="bg-gray-50 border-t border-gray-100 p-8 hidden flex-col md:flex-row gap-6">
                 <div class="flex-1">
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2" data-i18n="labelOriginal">Original</p>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2" data-i18n="labelOriginal">原图</p>
                     <div class="rounded-lg overflow-hidden shadow-sm border border-gray-200 bg-white h-64 flex items-center justify-center">
                         <img id="resultOriginal" class="max-h-full max-w-full object-contain">
                     </div>
                 </div>
                 
                 <div class="flex-1">
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2" data-i18n="labelResult">Result</p>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2" data-i18n="labelResult">去底结果 (透明)</p>
                     <div class="rounded-lg overflow-hidden shadow-sm border border-gray-200 checkerboard h-64 flex items-center justify-center relative group">
                         <img id="resultFinal" class="max-h-full max-w-full object-contain relative z-10">
-                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center z-20">
-                            <span class="text-white font-medium" data-i18n="previewHover">Transparent Background</span>
-                        </div>
                     </div>
                     <a id="downloadLink" class="mt-4 block w-full text-center bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg transition shadow-md shadow-green-500/20" data-i18n="btnDownload">
-                        Download HD Image
+                        下载高清原图
                     </a>
                 </div>
             </div>
@@ -156,10 +118,10 @@
         </div>
 
         <div class="mt-12 text-center fade-in" style="animation-delay: 0.2s;">
-            <h2 class="text-2xl font-bold text-slate-800 mb-3" data-i18n="moreTitle">Want more magical AI tools?</h2>
-            <p class="text-slate-600 mb-6 max-w-lg mx-auto" data-i18n="moreDesc">We are building a platform of lightweight, useful AI apps. Excel tools, PDF converters, and more.</p>
-            <a href="https://aifura.com" class="inline-flex items-center gap-2 bg-slate-900 text-white px-8 py-3 rounded-full font-semibold hover:bg-slate-800 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-                <span data-i18n="visitBtn">Visit Aifura.com</span>
+            <h2 class="text-2xl font-bold text-slate-800 mb-3" data-i18n="moreTitle">想要更多神奇的 AI 工具？</h2>
+            <p class="text-slate-600 mb-6 max-w-lg mx-auto" data-i18n="moreDesc">我们正在打造一个轻量级、好用的 AI 工具平台。Excel 处理、PDF 转换等等。</p>
+            <a href="/" class="inline-flex items-center gap-2 bg-slate-900 text-white px-8 py-3 rounded-full font-semibold hover:bg-slate-800 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                <span data-i18n="visitBtn">访问 Aifura.com 首页</span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
             </a>
         </div>
@@ -167,13 +129,13 @@
     </main>
 
     <footer class="mt-auto py-8 text-center text-slate-400 text-sm border-t border-gray-200 bg-white">
-        <p>&copy; 2025 Aifura.com. All rights reserved. <span class="hidden sm:inline">|</span> <span data-i18n="footerTag">Made with ❤️ by Qun</span></p>
+        <p>&copy; 2025 Aifura.com. All rights reserved. <span class="hidden sm:inline">|</span> <span data-i18n="footerTag">由 Qun 用 ❤️ 制作</span></p>
     </footer>
 
     <script src="imgly-background-removal.min.js"></script>
 
     <script>
-        // ================= 多语言配置 (i18n) =================
+        // ...这里是逻辑代码，已经包含了双语支持...
         const translations = {
             en: {
                 title: "AI Background Remover",
@@ -189,7 +151,6 @@
                 firstTimeHint: "First time load may take 30s to download AI model. Please be patient.",
                 labelOriginal: "Original",
                 labelResult: "Result (Transparent)",
-                previewHover: "Transparent",
                 btnDownload: "Download HD Image",
                 moreTitle: "Want more magical AI tools?",
                 moreDesc: "We are building a platform of lightweight, useful AI apps. Excel tools, PDF converters, and more.",
@@ -213,7 +174,6 @@
                 firstTimeHint: "首次使用需要下载 AI 模型 (约80MB)，可能需要30秒，请耐心等待。",
                 labelOriginal: "原图",
                 labelResult: "去底结果 (透明)",
-                previewHover: "透明背景",
                 btnDownload: "下载高清原图",
                 moreTitle: "想要更多神奇的 AI 工具？",
                 moreDesc: "我们正在打造一个轻量级、好用的 AI 工具平台。Excel 处理、PDF 转换等等。",
@@ -225,43 +185,27 @@
             }
         };
 
-        let currentLang = 'zh'; // 默认语言
+        // 默认设置为中文
+        let currentLang = 'zh';
 
-        // 切换语言函数
         function setLanguage(lang) {
             currentLang = lang;
             document.getElementById('currentLangLabel').textContent = lang === 'en' ? 'English' : '中文';
-            
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (translations[lang][key]) {
                     el.textContent = translations[lang][key];
                 }
             });
-
-            // 更新 HTML lang 属性有助于 SEO
-            document.documentElement.lang = lang === 'en' ? 'en' : 'zh-CN';
-            
-            // 更新 Title 标签
-            if(lang === 'zh') {
-                document.title = "免费 AI 智能抠图 - 保护隐私 | Aifura";
-            } else {
-                document.title = "Free AI Background Remover - Privacy First | Aifura";
-            }
+            document.title = lang === 'en' ? "Free AI Background Remover - Privacy First | Aifura" : "免费 AI 智能抠图 - 保护隐私 | Aifura";
         }
 
-        // 绑定切换按钮
         document.getElementById('langToggle').addEventListener('click', () => {
             const newLang = currentLang === 'en' ? 'zh' : 'en';
             setLanguage(newLang);
         });
 
-        // 初始化语言 (尝试检测浏览器语言)
-        const userLang = navigator.language || navigator.userLanguage;
-        setLanguage(userLang.startsWith('zh') ? 'zh' : 'en');
-
-
-        // ================= 核心逻辑 =================
+        // 核心逻辑
         const fileInput = document.getElementById('fileInput');
         const uploadArea = document.getElementById('uploadArea');
         const processBtn = document.getElementById('processBtn');
@@ -272,98 +216,57 @@
         const progressContainer = document.getElementById('progressContainer');
         const progressText = document.getElementById('progressText');
         const resultArea = document.getElementById('resultArea');
-        const resultOriginal = document.getElementById('resultOriginal');
         const resultFinal = document.getElementById('resultFinal');
+        const resultOriginal = document.getElementById('resultOriginal');
         const downloadLink = document.getElementById('downloadLink');
-
         let selectedFile = null;
 
-        // 拖拽支持
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('border-blue-500', 'bg-blue-50');
-        });
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('border-blue-500', 'bg-blue-50');
-        });
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('border-blue-500', 'bg-blue-50');
-            if(e.dataTransfer.files && e.dataTransfer.files[0]) {
-                handleFile(e.dataTransfer.files[0]);
-            }
-        });
         uploadArea.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', (e) => {
-            if(e.target.files && e.target.files[0]) handleFile(e.target.files[0]);
-        });
+        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('bg-blue-50'); });
+        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('bg-blue-50'));
+        uploadArea.addEventListener('drop', (e) => { e.preventDefault(); uploadArea.classList.remove('bg-blue-50'); if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+        fileInput.addEventListener('change', (e) => { if(e.target.files[0]) handleFile(e.target.files[0]); });
 
         function handleFile(file) {
             selectedFile = file;
             fileName.textContent = file.name;
             fileSize.textContent = (file.size / 1024 / 1024).toFixed(2) + " MB";
-            
             const reader = new FileReader();
-            reader.onload = (e) => {
-                previewThumb.src = e.target.result;
-                resultOriginal.src = e.target.result;
-            }
+            reader.onload = (e) => { previewThumb.src = e.target.result; resultOriginal.src = e.target.result; }
             reader.readAsDataURL(file);
-            
             controlPanel.classList.remove('hidden');
-            resultArea.classList.add('hidden'); // 隐藏上次结果
-            // 平滑滚动
-            controlPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            resultArea.classList.add('hidden');
         }
 
         processBtn.addEventListener('click', async () => {
             if (!selectedFile) return;
-
             processBtn.disabled = true;
             processBtn.classList.add('opacity-50', 'cursor-not-allowed');
             progressContainer.classList.remove('hidden');
-            resultArea.classList.add('hidden');
             
-            // 记录开始时间
-            const startTime = performance.now();
-
             try {
+                // 调用本地 JS 库
                 const blob = await imglyRemoveBackground(selectedFile, {
                     progress: (key, current, total) => {
-                        const percent = Math.round((current / total) * 100);
-                        // 只有下载模型时才更新这个详细进度
-                        if(current !== total) {
-                           progressText.textContent = `${translations[currentLang].downloading} (${percent}%)`;
-                        } else {
-                           progressText.textContent = translations[currentLang].processing;
-                        }
-                    },
-                    debug: false
+                         const percent = Math.round((current / total) * 100);
+                         if(current !== total) {
+                            progressText.textContent = `${translations[currentLang].downloading} (${percent}%)`;
+                         } else {
+                            progressText.textContent = translations[currentLang].processing;
+                         }
+                    }
                 });
-
-                const endTime = performance.now();
-                const duration = ((endTime - startTime) / 1000).toFixed(2);
-
                 const url = URL.createObjectURL(blob);
                 resultFinal.src = url;
                 downloadLink.href = url;
                 downloadLink.download = `aifura_cut_${selectedFile.name.split('.')[0]}.png`;
-
                 resultArea.classList.remove('hidden');
-                resultArea.classList.add('flex'); // 确保 flex 布局生效
-                progressText.textContent = `${translations[currentLang].success} (${duration}s)`;
-                progressText.classList.replace('text-blue-600', 'text-green-600');
-                
-                // 滚动到结果区
-                setTimeout(() => {
-                    resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 100);
-
+                resultArea.classList.add('flex');
+                progressText.textContent = translations[currentLang].success;
             } catch (error) {
-                console.error(error);
                 progressText.textContent = "Error: " + error.message;
-                progressText.classList.replace('text-blue-600', 'text-red-600');
-                alert("Sorry, something went wrong. Please try using a computer browser.");
+                progressText.classList.add('text-red-500');
+                console.error(error);
             } finally {
                 processBtn.disabled = false;
                 processBtn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -372,4 +275,3 @@
     </script>
 </body>
 </html>
-
