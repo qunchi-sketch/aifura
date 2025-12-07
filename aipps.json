@@ -68,5 +68,20 @@
     "heat": 20,
     "author": "Qun",
     "contact": "mailto:chiqun1995@foxmail.com"
-  }
+  },
+{
+  "id": "remove-bg",
+  "title": "AI Background Remover (Privacy Pro)",
+  "title_cn": "AI 智能抠图 (隐私保护·无限版)",
+  "description": "Professional browser-based tool. 100% local processing (Privacy First), unlimited HD downloads, and bilingual support.",
+  "description_cn": "专业级浏览器端抠图工具。完全本地运行（不上传服务器），隐私绝对安全。支持中英双语切换，无限次免费下载高清原图。",
+  "tags": ["image", "ai", "privacy", "offline", "bilingual"],
+  "fileUrl": "aipps/backgroundremover.html",
+  "uploadTime": "2025-12-07T10:00:00Z",
+  "stars": 5,
+  "heat": 99,
+  "author": "Qun",
+  "contact": "mailto:chiqun1995@foxmail.com"
+}
 ]
+
