@@ -73,7 +73,16 @@
         </div>
     </div>
 
-    <script src="imgly-background-removal.min.js"></script>
+    <script type="module">
+    // 1. 从你刚才保存的本地文件导入核心功能
+    import { removeBackground } from './imgly-background-removal.min.js';
+
+    // 2. 把它挂载到 window 上，让你原本的逻辑代码能找到它
+    // (因为你的旧代码用的是 imglyRemoveBackground 这个名字，所以我们要对接一下)
+    window.imglyRemoveBackground = removeBackground;
+    
+    console.log("AI 引擎已加载 (ES Module 模式)");
+    </script>
 
     <script>
         const fileInput = document.getElementById('fileInput');
@@ -161,3 +170,4 @@
     </script>
 </body>
 </html>
+
