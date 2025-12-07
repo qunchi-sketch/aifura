@@ -3,65 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 智能抠图 (稳定版)</title>
-    
+    <title>AI 智能抠图 (免下载版)</title>
     <style>
-        body { margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; background: #f0f4f8; display: flex; flex-direction: column; align-items: center; min-height: 100vh; color: #1e293b; }
+        body { font-family: -apple-system, sans-serif; background: #f0f4f8; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 800px; width: 100%; background: white; border-radius: 20px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .nav { width: 100%; max-width: 800px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .back-link { text-decoration: none; color: #666; font-weight: 500; }
         
-        /* 导航栏 */
-        .nav { width: 100%; background: white; border-bottom: 1px solid #e2e8f0; padding: 15px 0; margin-bottom: 40px; }
-        .nav-content { max-width: 800px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
-        .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 20px; color: #0f172a; text-decoration: none; }
-        .logo-box { background: #2563eb; color: white; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-        .home-link { color: #64748b; text-decoration: none; font-size: 14px; font-weight: 500; }
-        .home-link:hover { color: #2563eb; }
-
-        /* 主容器 */
-        .main-card { background: white; width: 90%; max-width: 800px; border-radius: 24px; padding: 40px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+        /* 强制图标大小 */
+        .icon-box svg { width: 60px; height: 60px; color: #cbd5e1; margin-bottom: 15px; }
         
-        h1 { text-align: center; font-size: 32px; margin-bottom: 10px; }
-        .subtitle { text-align: center; color: #64748b; margin-bottom: 30px; line-height: 1.6; }
-        .badge-container { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
-        .badge { padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 600; }
-        .badge-green { background: #dcfce7; color: #166534; }
-        .badge-blue { background: #dbeafe; color: #1e40af; }
-
-        /* 上传区域 (重点：修复图标变大) */
         .upload-area { 
-            border: 2px dashed #cbd5e1; border-radius: 16px; padding: 60px 20px; text-align: center; 
-            cursor: pointer; transition: all 0.2s; background: #f8fafc; position: relative; overflow: hidden;
+            border: 2px dashed #cbd5e1; border-radius: 16px; padding: 50px 20px; text-align: center; 
+            cursor: pointer; background: #f8fafc; transition: all 0.2s; 
         }
         .upload-area:hover { border-color: #2563eb; background: #eff6ff; }
+        .upload-area:hover .icon-box svg { color: #2563eb; }
         
-        /* 强制锁定图标大小，防止它撑满屏幕 */
-        .upload-icon svg { width: 64px; height: 64px; color: #94a3b8; margin-bottom: 15px; }
-        .upload-area:hover .upload-icon svg { color: #2563eb; }
-        
-        .upload-text { font-size: 18px; font-weight: 600; margin-bottom: 5px; }
-        .upload-sub { font-size: 14px; color: #94a3b8; }
-
-        /* 按钮 */
         .btn { 
-            display: block; width: 100%; background: #2563eb; color: white; border: none; padding: 18px; 
-            border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 30px; 
-            transition: background 0.2s; 
+            width: 100%; background: #2563eb; color: white; border: none; padding: 16px; border-radius: 12px; 
+            font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; 
         }
-        .btn:hover { background: #1d4ed8; }
-        .btn:disabled { background: #cbd5e1; cursor: not-allowed; }
-
-        /* 状态提示 */
-        #status { text-align: center; margin-top: 20px; font-size: 14px; font-weight: 500; min-height: 20px; color: #2563eb; }
-
-        /* 结果展示 */
-        .result-grid { display: none; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 40px; }
-        @media (max-width: 600px) { .result-grid { grid-template-columns: 1fr; } }
+        .btn:disabled { background: #94a3b8; cursor: not-allowed; }
         
-        .result-item { background: #f1f5f9; padding: 15px; border-radius: 16px; }
-        .label { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 10px; }
-        .img-box { 
-            height: 300px; background: white; border-radius: 8px; border: 1px solid #e2e8f0; 
-            display: flex; align-items: center; justify-content: center; overflow: hidden;
-        }
+        #status { text-align: center; margin-top: 15px; color: #2563eb; font-size: 14px; min-height: 20px;}
+        
+        .result-grid { display: none; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; }
+        .img-box { background: #eee; border-radius: 8px; overflow: hidden; height: 300px; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; }
         img { max-width: 100%; max-height: 100%; object-fit: contain; }
         
         .checkerboard {
@@ -69,138 +37,108 @@
             background-size: 20px 20px;
             background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
         }
+        
+        @media(max-width:600px){ .result-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-    <nav class="nav">
-        <div class="nav-content">
-            <a href="/" class="logo">
-                <div class="logo-box">A</div>
-                Aifura Tools
-            </a>
-            <a href="/" class="home-link">← 返回首页</a>
-        </div>
-    </nav>
+    <div class="nav">
+        <div style="font-weight:800; font-size:20px;">Aifura Tools</div>
+        <a href="/" class="back-link">返回首页</a>
+    </div>
 
-    <div class="main-card">
-        <h1>AI 智能一键抠图</h1>
-        <div class="subtitle">
-            内核已升级为 Transformers.js (RMBG-1.4)<br>
-            更稳定、不报错、无需下载本地文件
-            <div class="badge-container">
-                <span class="badge badge-green">🔒 隐私安全</span>
-                <span class="badge badge-blue">⚡ 免费无限</span>
-            </div>
-        </div>
+    <div class="container">
+        <h1 style="text-align:center; margin-bottom:10px;">AI 智能一键抠图</h1>
+        <p style="text-align:center; color:#666; margin-bottom:30px;">免费、无限、本地运行 (隐私保护)</p>
 
         <div class="upload-area" id="uploadArea">
-            <input type="file" id="fileInput" accept="image/*" style="display: none;">
-            <div class="upload-icon">
+            <input type="file" id="fileInput" accept="image/*" style="display:none">
+            <div class="icon-box">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
             </div>
-            <div class="upload-text">点击或拖拽图片到这里</div>
-            <div class="upload-sub">支持 JPG, PNG, WEBP</div>
+            <div style="font-weight:600; font-size:18px;">点击或拖拽上传图片</div>
         </div>
 
-        <button id="processBtn" class="btn" disabled>请先选择图片</button>
+        <button id="processBtn" class="btn" disabled>请先上传图片</button>
         <div id="status"></div>
 
         <div class="result-grid" id="resultArea">
-            <div class="result-item">
-                <div class="label">原图</div>
-                <div class="img-box">
-                    <img id="imgOriginal">
-                </div>
+            <div>
+                <div style="font-size:12px; font-weight:700; color:#64748b; margin-bottom:5px;">原图</div>
+                <div class="img-box"><img id="imgOriginal"></div>
             </div>
-            <div class="result-item">
-                <div class="label">去底结果</div>
-                <div class="img-box checkerboard">
-                    <img id="imgResult">
-                </div>
-                <a id="downloadBtn" class="btn" style="margin-top: 10px; background: #10b981; padding: 10px; font-size: 14px;">下载透明 PNG</a>
+            <div>
+                <div style="font-size:12px; font-weight:700; color:#64748b; margin-bottom:5px;">抠图结果</div>
+                <div class="img-box checkerboard"><img id="imgResult"></div>
+                <a id="downloadBtn" class="btn" style="margin-top:10px; padding:12px; text-decoration:none; display:block; text-align:center; background:#10b981;">下载图片</a>
             </div>
         </div>
     </div>
 
-    <script type="module">
-        import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
+    <script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.3.0/dist/imgly-background-removal.min.js"></script>
 
-        // 配置：允许从 CDN 加载模型，不强制本地
-        env.allowLocalModels = false;
-        env.useBrowserCache = true;
-
+    <script>
         const fileInput = document.getElementById('fileInput');
         const uploadArea = document.getElementById('uploadArea');
         const processBtn = document.getElementById('processBtn');
         const status = document.getElementById('status');
+        const resultArea = document.getElementById('resultArea');
         const imgOriginal = document.getElementById('imgOriginal');
         const imgResult = document.getElementById('imgResult');
-        const resultArea = document.getElementById('resultArea');
         const downloadBtn = document.getElementById('downloadBtn');
-
         let selectedFile = null;
 
-        // UI 交互逻辑
         uploadArea.addEventListener('click', () => fileInput.click());
-        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.style.borderColor = '#2563eb'; uploadArea.style.background = '#eff6ff'; });
-        uploadArea.addEventListener('dragleave', () => { uploadArea.style.borderColor = '#cbd5e1'; uploadArea.style.background = '#f8fafc'; });
-        uploadArea.addEventListener('drop', (e) => { 
-            e.preventDefault(); 
-            if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
-        });
-        fileInput.addEventListener('change', (e) => { if(e.target.files[0]) handleFile(e.target.files[0]); });
+        fileInput.addEventListener('change', (e) => { if(e.target.files[0]) handleFile(e.target.files[0]) });
+        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.style.background = '#eff6ff'; });
+        uploadArea.addEventListener('dragleave', (e) => { e.preventDefault(); uploadArea.style.background = '#f8fafc'; });
+        uploadArea.addEventListener('drop', (e) => { e.preventDefault(); if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]) });
 
         function handleFile(file) {
             selectedFile = file;
             imgOriginal.src = URL.createObjectURL(file);
-            status.textContent = `已选文件: ${file.name}`;
+            status.textContent = `已选: ${file.name}`;
             processBtn.disabled = false;
             processBtn.textContent = "开始一键抠图";
             resultArea.style.display = 'none';
         }
 
-        // 核心处理逻辑
         processBtn.addEventListener('click', async () => {
-            if (!selectedFile) return;
-            
+            if(!selectedFile) return;
+
+            // 检查库是否加载
+            if(typeof imglyRemoveBackground === 'undefined') {
+                alert("AI 核心库加载失败，请检查网络或删除 _headers 文件！");
+                return;
+            }
+
             processBtn.disabled = true;
-            processBtn.textContent = "正在处理中...";
-            status.textContent = "🚀 正在启动 AI 引擎 (首次运行需要下载模型，请耐心等待)...";
+            processBtn.textContent = "处理中...";
+            status.textContent = "🚀 正在下载模型并处理 (首次约需 20 秒)...";
             
             try {
-                // 1. 加载模型 (RMBG-1.4)
-                const segmenter = await pipeline('image-segmentation', 'Xenova/rmbg-1.4', {
-                    progress_callback: (data) => {
-                        if (data.status === 'progress') {
-                            const percent = Math.round(data.progress);
-                            status.textContent = `⬇️ 正在下载模型组件 (${data.file}): ${percent}%`;
-                        }
+                // 调用全局函数 imglyRemoveBackground
+                const blob = await imglyRemoveBackground(selectedFile, {
+                    progress: (key, current, total) => {
+                         const percent = Math.round((current / total) * 100);
+                         status.textContent = `⏳ 正在加载组件: ${percent}%`;
                     }
                 });
-
-                // 2. 执行推理
-                status.textContent = "⚙️ AI 正在计算像素...";
-                const output = await segmenter(imgOriginal.src);
-
-                // 3. 处理结果 (Xenova/rmbg-1.4 直接返回合成好的图片)
-                // Transformers.js 返回的是一个 RawImage 对象，我们需要把它转为 Blob URL
-                const blob = await output.toBlob();
-                const url = URL.createObjectURL(blob);
                 
+                const url = URL.createObjectURL(blob);
                 imgResult.src = url;
                 downloadBtn.href = url;
-                downloadBtn.download = "aifura_cut_" + selectedFile.name;
+                downloadBtn.download = "cut_" + selectedFile.name;
                 
                 resultArea.style.display = 'grid';
                 status.textContent = "✨ 处理成功！";
-                status.style.color = "#166534";
-                
+                status.style.color = "green";
             } catch (error) {
                 console.error(error);
-                status.textContent = "❌ 出错了: " + error.message;
-                status.style.color = "#dc2626";
-                alert("处理失败！请按 F12 查看控制台，或检查网络连接。");
+                status.textContent = "❌ 出错: " + error.message;
+                status.style.color = "red";
+                alert("出错啦！\n1. 请务必确认已删除 GitHub 根目录的 _headers 文件。\n2. 尝试使用电脑浏览器访问。");
             } finally {
                 processBtn.disabled = false;
                 processBtn.textContent = "再试一次";
