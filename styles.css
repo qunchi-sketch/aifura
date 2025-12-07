@@ -721,4 +721,56 @@ input[type="file"] {
   height: 100%; 
   min-height: 200px;
 }
+/* ==========
+   New Upload Page Styles (Google Form + Email)
+   补充：用于美化 Google 表单和邮件投稿的双入口布局
+========== */
+
+/* 复用并扩展原本的 form-card 样式，增加内边距 */
+.upload-guide-card {
+  text-align: left;
+  margin-top: 24px;
+  padding: 32px; 
+}
+
+.guide-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 12px;
+}
+
+.guide-list {
+  padding-left: 20px;
+  color: #9ca3af;
+  font-size: 14px;
+  line-height: 1.8;
+  margin-bottom: 30px;
+}
+
+.guide-list li {
+  margin-bottom: 8px;
+}
+
+/* 按钮区域的布局 */
+.upload-action-row {
+  text-align: center;
+  padding-top: 10px;
+  width: 100%;
+}
+
+/* 让按钮更大、更圆润 */
+.btn-large {
+  padding: 14px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+  display: flex;       /* 确保文字居中 */
+  align-items: center;
+  justify-content: center;
+}
+
 
