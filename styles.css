@@ -743,15 +743,18 @@ input[type="file"] {
 }
 
 .guide-list {
-  padding-left: 20px;
+  /* 增加内边距和外边距，防止数字跑到卡片边缘外面 */
+  padding-left: 24px; 
+  margin-left: 8px;   
   color: #9ca3af;
   font-size: 14px;
   line-height: 1.8;
   margin-bottom: 30px;
 }
 
+/* 确保每一行之间有点空隙，阅读更舒服 */
 .guide-list li {
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 /* 按钮区域的布局 */
@@ -772,5 +775,6 @@ input[type="file"] {
   align-items: center;
   justify-content: center;
 }
+
 
 
