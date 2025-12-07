@@ -43,7 +43,7 @@ function renderCards(list) {
     const card = document.createElement("article");
     card.className = "app-card";
 
-    // 给排序用的 data- 属性
+    // 排序用的数据
     card.dataset.id = app.id;
     card.dataset.stars = app.stars || 0;
     card.dataset.heat = app.heat || 0;
@@ -53,26 +53,42 @@ function renderCards(list) {
       .map((tag) => `<span class="tag-pill">${tag}</span>`)
       .join("");
 
+    // 处理作者和联系方式
+    const authorName = escapeHtml(app.author || "Anonymous");
+    // 如果有联系方式，显示一个小图标或文字链接；如果没有，就不显示链接
+    const contactLink = app.contact 
+      ? `<a href="${app.contact}" target="_blank" class="author-contact-link">Contact</a>` 
+      : "";
+
     card.innerHTML = `
-      <div class="app-card-badge">AIPP · HTML</div>
+      <div class="app-card-header">
+        <div class="app-card-badge">HTML</div>
+        <div class="app-card-author">
+          <span>By ${authorName}</span>
+          ${contactLink}
+        </div>
+      </div>
+
       <div class="app-card-title">${escapeHtml(app.title || "Untitled AIPP")}</div>
       <div class="app-card-desc">
         ${escapeHtml(app.description || "")}
       </div>
+      
       <div class="app-card-meta">
         <span>★ ${(app.stars || 0).toString()}</span>
         <span>· Heat ${(app.heat || 0).toString()}</span>
-        <span>· ${app.uploadTime ? new Date(app.uploadTime).toLocaleDateString() : ""}</span>
       </div>
+      
       <div class="app-card-tags">
         ${tagsHtml}
       </div>
-      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
+
+      <div style="margin-top:auto; padding-top:12px; display:flex; gap:8px;">
+        <a href="${app.fileUrl || "#"}" target="_blank" class="btn btn-xs btn-primary" style="flex:1;">
+          Run App
+        </a>
         <a href="detail.html?id=${encodeURIComponent(app.id)}" class="btn btn-xs btn-outline">
           Details
-        </a>
-        <a href="${app.fileUrl || "#"}" target="_blank" class="btn btn-xs btn-primary">
-          Open
         </a>
       </div>
     `;
@@ -80,7 +96,6 @@ function renderCards(list) {
     grid.appendChild(card);
   });
 }
-
 // 3. 搜索逻辑：绑定首页大搜索框 + 顶部小搜索框
 function setupSearch() {
   const heroInput = document.getElementById("hero-search-input");
@@ -160,3 +175,4 @@ function escapeHtml(str) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 }
+
