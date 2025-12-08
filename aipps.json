@@ -82,8 +82,23 @@
   "heat": 99,
   "author": "Qun",
   "contact": "mailto:chiqun1995@foxmail.com"
+},
+  {
+  "id": "qr-barcode-generator",
+  "title": "QR & Barcode Generator",
+  "title_cn": "二维码/条形码生成器",
+  "description": "Pure front-end tool to generate QR codes (with logo support) and Barcodes (Code 128) instantly in your browser. Privacy-first, no file upload.",
+  "description_cn": "本地运行工具，可在浏览器中即时生成二维码（支持Logo）和条形码（Code 128）。隐私优先，文件不需上传。",
+  "tags": ["qr code", "barcode", "converter", "utility", "tool"],
+  "fileUrl": "aipps/qr_barcode_generator.html",
+  "uploadTime": "2025-12-08T09:00:00Z",
+  "stars": 5,
+  "heat": 99,
+  "author": "Qun",
+  "contact": "mailto:chiqun1995@foxmail.com"
 }
 ]
+
 
 
 
