@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="title">二维码/条形码生成器 - Aifura AIPP</title>
+    <meta name="description" data-lang-key="meta-description" content="纯前端、支持Logo定制的二维码和条形码生成器。即用即走，保障隐私。更多AI工具请访问 aifura.com。">
+    <meta name="keywords" content="二维码生成器, 条形码生成器, QR Code Generator, Barcode Generator, 带Logo二维码, 纯前端工具, AIPP">
+    <meta property="og:title" data-lang-key="og-title" content="二维码/条形码生成器 - Aifura AIPP">
+    <meta property="og:description" data-lang-key="og-description" content="纯前端、支持Logo定制的二维码和条形码生成器。即用即走，保障隐私。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://aifura.com/qr_barcode_generator.html">
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --card-color: #2c2c44;
+            --text-color: #e4e4e4;
+            --primary-color: #6a00ff;
+            --secondary-text: #a0a0a0;
+            --border-color: #3f3f5a;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 50px;
+        }
+
+        /* --- Header & Language Switch --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+
+        .lang-switch button {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 5px 10px;
+            margin-left: 5px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .lang-switch button.active, .lang-switch button:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        /* --- Input Card & Controls --- */
+        .card {
+            background-color: var(--card-color);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-top: 0;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            background-color: #1a1a2e;
+            color: var(--text-color);
+            border-radius: 6px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        button.primary {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: background-color 0.2s;
+        }
+
+        button.primary:hover {
+            background-color: #8c4dff;
+        }
+
+        /* --- Logo Upload Area --- */
+        .logo-upload-area {
+            border: 2px dashed var(--border-color);
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .logo-preview {
+            max-width: 60px;
+            max-height: 60px;
+            border-radius: 50%;
+            margin: 10px auto;
+            display: none;
+        }
+
+        .logo-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        /* --- Output Area --- */
+        .output-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .output-card {
+            background-color: var(--card-color);
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .output-card h2 {
+            margin-top: 0;
+            font-size: 18px;
+            color: var(--text-color);
+        }
+
+        #qr-code-container, #barcode-container {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-bottom: 15px;
+            /* 确保 SVG/Canvas 在白色背景上显示 */
+        }
+        
+        /* 移除初始 display: none，让 JS 完全控制 */
+        #barcode-svg {
+            /* 初始可能为空，但确保它能被 JsBarcode 填充 */
+        }
+
+        .download-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .download-btn:hover {
+            background-color: #218838;
+        }
+
+        /* --- Footer & Call to Action --- */
+        footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+            font-size: 14px;
+            color: var(--secondary-text);
+        }
+
+        footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1 data-lang-key="h1-title">QR & Barcode Generator - Aifura AIPP</h1>
+        <div class="lang-switch">
+            <button id="lang-en" class="active">English</button>
+            <button id="lang-zh">中文</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <label for="input-text" data-lang-key="input-label">输入文本或链接 (Enter Text or URL):</label>
+        <input type="text" id="input-text" placeholder="https://aifura.com" value="https://aifura.com">
+        
+        <div class="logo-upload-area">
+            <p data-lang-key="logo-prompt">上传 Logo (可选，仅用于二维码):</p>
+            <input type="file" id="logo-file-input" accept="image/*" style="display:none;">
+            <button class="primary" onclick="document.getElementById('logo-file-input').click()" data-lang-key="upload-btn">上传 Logo 文件</button>
+            
+            <img id="logo-preview" class="logo-preview" alt="Logo Preview">
+            <div id="logo-status" style="font-size: 14px; margin-top: 10px; color: #f0f0f0;"></div>
+
+            <div class="logo-controls">
+                <button class="download-btn" id="remove-logo" style="display: none;" data-lang-key="remove-logo-btn">移除 Logo</button>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="primary" id="generate-qr" data-lang-key="generate-qr-btn">生成二维码 (QR Code)</button>
+            <button class="primary" id="generate-barcode" data-lang-key="generate-barcode-btn">生成条形码 (Barcode)</button>
+        </div>
+    </div>
+
+    <div class="output-section">
+        <div class="output-card">
+            <h2 data-lang-key="qr-title">二维码 (QR Code)</h2>
+            <div id="qr-code-container">
+                <canvas id="qr-canvas"></canvas>
+            </div>
+            <button class="download-btn" id="download-qr" data-lang-key="download-qr-btn">下载二维码 (PNG)</button>
+        </div>
+
+        <div class="output-card">
+            <h2 data-lang-key="barcode-title">条形码 (Barcode)</h2>
+            <div id="barcode-container">
+                </div>
+            <button class="download-btn" id="download-barcode" data-lang-key="download-barcode-btn" style="display:none;">下载条形码 (SVG)</button>
+            <p style="font-size: 12px; color: var(--secondary-text);" data-lang-key="barcode-tip">注意：条形码只支持纯文本，不支持 Logo。</p>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    <span data-lang-key="footer-text">Made with ❤️ by Qun & AI. Find more tools at </span>
+    <a href="https://aifura.com" target="_blank">aifura.com</a>
+</footer>
+
+
+<script>
+    // --- 1. Language Data ---
+    const translations = {
+        'zh': {
+            'title': '二维码/条形码生成器 - Aifura AIPP',
+            'meta-description': '纯前端、支持Logo定制的二维码和条形码生成器。即用即走，保障隐私。更多AI工具请访问 aifura.com。',
+            'og-title': '二维码/条形码生成器 - Aifura AIPP',
+            'og-description': '纯前端、支持Logo定制的二维码和条形码生成器。即用即走，保障隐私。',
+            'h1-title': '二维码 & 条形码生成器 - Aifura AIPP',
+            'input-label': '输入文本或链接 (Enter Text or URL):',
+            'logo-prompt': '上传 Logo (可选，仅用于二维码):',
+            'upload-btn': '上传 Logo 文件',
+            'remove-logo-btn': '移除 Logo',
+            'generate-qr-btn': '生成二维码 (QR Code)',
+            'generate-barcode-btn': '生成条形码 (Barcode)',
+            'qr-title': '二维码 (QR Code)',
+            'barcode-title': '条形码 (Barcode)',
+            'download-qr-btn': '下载二维码 (PNG)',
+            'download-barcode-btn': '下载条形码 (SVG)',
+            'barcode-tip': '注意：条形码只支持纯文本，不支持 Logo。',
+            'footer-text': 'Made with ❤️ by Qun & AI. 发现更多工具请访问 ',
+            'placeholder': '请输入文本或 URL...'
+        },
+        'en': {
+            'title': 'QR & Barcode Generator - Aifura AIPP',
+            'meta-description': 'Pure front-end QR and Barcode Generator with Logo customization. Use and go, ensuring privacy. Find more AI tools at aifura.com.',
+            'og-title': 'QR & Barcode Generator - Aifura AIPP',
+            'og-description': 'Pure front-end QR and Barcode Generator with Logo customization. Use and go, ensuring privacy.',
+            'h1-title': 'QR & Barcode Generator - Aifura AIPP',
+            'input-label': 'Enter Text or URL:',
+            'logo-prompt': 'Upload Logo (Optional, QR Code Only):',
+            'upload-btn': 'Upload Logo File',
+            'remove-logo-btn': 'Remove Logo',
+            'generate-qr-btn': 'Generate QR Code',
+            'generate-barcode-btn': 'Generate Barcode',
+            'qr-title': 'QR Code',
+            'barcode-title': 'Barcode',
+            'download-qr-btn': 'Download QR Code (PNG)',
+            'download-barcode-btn': 'Download Barcode (SVG)',
+            'barcode-tip': 'Note: Barcode only supports plain text, not Logo embedding.',
+            'footer-text': 'Made with ❤️ by Qun & AI. Find more tools at ',
+            'placeholder': 'Enter text or URL...'
+        }
+    };
+
+    let currentLang = 'zh';
+    let logoImage = null; // Stores the Base64 image data of the logo
+
+    // --- 2. Language Switch Functions ---
+    function setLanguage(lang) {
+        currentLang = lang;
+        const t = translations[lang];
+
+        // Update all elements with data-lang-key
+        document.querySelectorAll('[data-lang-key]').forEach(el => {
+            const key = el.getAttribute('data-lang-key');
+            if (t[key]) {
+                // Handle different element types
+                if (el.tagName === 'TITLE') {
+                    document.title = t[key];
+                } else if (el.tagName === 'META') {
+                    el.setAttribute('content', t[key]);
+                } else {
+                    el.textContent = t[key];
+                }
+            }
+        });
+        
+        // Update placeholder specifically
+        document.getElementById('input-text').placeholder = t['placeholder'];
+
+        // Update active class for buttons
+        document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+        document.getElementById('lang-zh').classList.toggle('active', lang === 'zh');
+    }
+
+    // --- 3. QR Code Generation ---
+    function generateQRCode() {
+        const text = document.getElementById('input-text').value.trim();
+        if (!text) return;
+
+        const container = document.getElementById('qr-code-container');
+        // 关键：清空并重新创建 Canvas 元素，防止 Logo 叠加错误
+        container.innerHTML = '<canvas id="qr-canvas"></canvas>'; 
+        const canvas = document.getElementById('qr-canvas');
+
+        // QR Code options
+        const options = {
+            errorCorrectionLevel: logoImage ? 'H' : 'L', // Higher correction for logo
+            margin: 4,
+            width: 200,
+            color: {
+                dark: "#000000",
+                light: "#ffffff"
+            }
+        };
+
+        QRCode.toCanvas(canvas, text, options, function (error) {
+            if (error) {
+                console.error(error);
+                return;
+            }
+            if (logoImage) {
+                embedLogo();
+            }
+        });
+    }
+
+    // --- 4. Logo Embedding (using Canvas) ---
+    function embedLogo() {
+        const canvas = document.getElementById('qr-canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        img.crossOrigin = "anonymous"; // 解决跨域问题，虽然这里是本地文件
+        img.onload = function() {
+            const qrSize = canvas.width;
+            const logoSize = qrSize * 0.2; // Logo takes up 20% of the QR code size
+            const x = (qrSize - logoSize) / 2;
+            const y = (qrSize - logoSize) / 2;
+
+            // 绘制白色背景圆圈，提高 Logo 可见度
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(qrSize / 2, qrSize / 2, logoSize / 2 + 5, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 绘制 Logo
+            ctx.drawImage(img, x, y, logoSize, logoSize);
+        };
+        img.src = logoImage;
+    }
+
+    // --- 5. Barcode Generation (修正后的最终版本) ---
+    function generateBarcode() {
+        // 1. 获取输入，如果为空则使用默认值进行测试
+        let text = document.getElementById('input-text').value.trim();
+        if (!text) {
+            text = "AIFURA123"; // 使用一个安全的 CODE128 字符串作为默认值
+            document.getElementById('input-text').value = text;
+        }
+
+        const barcodeContainer = document.getElementById('barcode-container');
+        
+        // 2. 清空并**创建新的 SVG 元素**，防止 JsBarcode 冲突
+        barcodeContainer.innerHTML = '<svg id="barcode-svg"></svg>';
+        const svg = document.getElementById('barcode-svg');
+        
+        // 3. 确保下载按钮可见
+        document.getElementById('download-barcode').style.display = 'block';
+
+        try {
+            JsBarcode(svg, text, {
+                format: "CODE128", 
+                displayValue: true,
+                fontSize: 18,
+                margin: 10,
+                width: 2,
+                height: 100
+            });
+            
+            // 成功后，显示 SVG 元素 (JsBarcode 成功生成后，SVG 内部会有内容)
+            svg.style.display = 'block';
+
+        } catch (e) {
+            // 失败时，给出更清晰的错误提示
+            alert(`[条形码错误 Barcode Error]: 文本无法生成 CODE128。请确保输入只包含数字和英文字母。原始错误: ${e.message}`);
+            svg.style.display = 'none';
+            document.getElementById('download-barcode').style.display = 'none';
+        }
+    }
+
+    // --- 6. Event Listeners ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initial language setting (default to Chinese)
+        setLanguage('zh');
+
+        // Language switch buttons
+        document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
+        document.getElementById('lang-zh').addEventListener('click', () => setLanguage('zh'));
+
+        // Generate buttons
+        document.getElementById('generate-qr').addEventListener('click', generateQRCode);
+        document.getElementById('generate-barcode').addEventListener('click', generateBarcode);
+        
+        // Initial generation on load
+        generateQRCode();
+
+        // Logo upload logic
+        const logoInput = document.getElementById('logo-file-input');
+        const logoPreview = document.getElementById('logo-preview');
+        const removeLogoBtn = document.getElementById('remove-logo');
+        
+        logoInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    logoImage = e.target.result;
+                    logoPreview.src = logoImage;
+                    logoPreview.style.display = 'block';
+                    removeLogoBtn.style.display = 'inline-block';
+                    generateQRCode(); // Re-generate QR code immediately
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        removeLogoBtn.addEventListener('click', () => {
+            logoImage = null;
+            logoInput.value = '';
+            logoPreview.style.display = 'none';
+            removeLogoBtn.style.display = 'none';
+            generateQRCode(); // Re-generate QR code without logo
+        });
+
+        // Download functionality (PNG for QR, SVG for Barcode)
+        document.getElementById('download-qr').addEventListener('click', () => {
+            const canvas = document.getElementById('qr-canvas');
+            const link = document.createElement('a');
+            link.download = 'aifura-qrcode.png';
+            // 必须等待 Canvas 渲染完毕，但在浏览器中它是同步的
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+
+        document.getElementById('download-barcode').addEventListener('click', () => {
+            const svg = document.getElementById('barcode-svg');
+            if (!svg) {
+                alert("请先生成条形码！");
+                return;
+            }
+            // 使用 XMLSerializer 将 SVG DOM 转换为字符串
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const svgBlob = new Blob([svgData], {type: "image/svg+xml;charset=utf-8"});
+            const url = URL.createObjectURL(svgBlob);
+            const link = document.createElement('a');
+            link.download = 'aifura-barcode.svg';
+            link.href = url;
+            link.click();
+        });
+    });
+
+</script>
+
+</body>
+</html>
