@@ -96,8 +96,23 @@
   "heat": 99,
   "author": "Qun",
   "contact": "mailto:chiqun1995@foxmail.com"
+},
+ {
+  "id": "pdf-compress",
+  "title": "Free Online PDF Compressor",
+  "title_cn": "在线 PDF 压缩工具",
+  "description": "Secure online PDF compressor. Process locally in browser, no server upload. High quality compression.",
+  "description_cn": "安全的在线 PDF 压缩器。无需上传服务器，本地浏览器直接处理。支持批量压缩，保持高画质。",
+  "tags": ["pdf", "compress", "privacy", "tool"],
+  "fileUrl": "aipps/compressPDF.html",
+  "uploadTime": "2025-12-08T00:00:00Z",
+  "stars": 5,
+  "heat": 95,
+  "author": "Qun",
+  "contact": "mailto:chiqun1995@foxmail.com"
 }
 ]
+
 
 
 
