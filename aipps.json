@@ -110,8 +110,24 @@
   "heat": 95,
   "author": "Qun",
   "contact": "mailto:chiqun1995@foxmail.com"
+},
+  {
+  "id": "pdf-page-resize-fit",
+  "title": "PDF Page Size Resizer (Fit & Center)",
+  "title_cn": "PDF 页面尺寸统一工具（等比缩放居中）",
+  "description": "Resize all PDF pages to a unified size (A4/Letter/custom), scale contents proportionally and center them. Keeps vector clarity and runs fully in-browser.",
+  "description_cn": "将 PDF 所有页面统一为相同尺寸（A4、Letter 或自定义），并对内容进行等比缩放和自动居中，保持文字与矢量清晰，全部在浏览器本地完成处理。",
+  "tags": ["pdf", "resize", "page", "fit", "center"],
+  "fileUrl": "aipps/pdf-page-resize-fit.html",
+  "uploadTime": "2025-12-09T00:00:00Z",
+  "stars": 5,
+  "heat": 85,
+  "author": "Qun",
+  "contact": "mailto:chiqun1995@foxmail.com"
 }
+
 ]
+
 
 
 
