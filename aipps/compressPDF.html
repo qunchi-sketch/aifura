@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>免费在线 PDF 压缩工具 - 极速瘦身，保护隐私</title>
+    <meta name="description" content="最安全的在线 PDF 压缩器。无需上传服务器，本地浏览器直接处理。支持批量压缩，保持高画质。">
+    <meta name="keywords" content="PDF压缩, 在线PDF工具, 减小PDF体积, PDF Compressor, Compress PDF Online">
+    <link rel="canonical" href="https://aifura.com/tools/pdf-compressor" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent-color: #3b82f6;
+            --text-main: #ffffff;
+            --text-secondary: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        header {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .lang-switch {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .lang-switch:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Main Container */
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+            max-width: 600px;
+        }
+
+        /* Tool Card */
+        .tool-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .drop-zone {
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 50px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: var(--accent-color);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .icon-upload {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        /* Controls */
+        .controls {
+            margin-top: 30px;
+            display: none; /* Hidden initially */
+            text-align: left;
+        }
+
+        .slider-container {
+            margin-bottom: 20px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 5px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-compress {
+            background: var(--accent-color);
+            color: white;
+            box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.39);
+        }
+
+        .btn-compress:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px 0 rgba(59, 130, 246, 0.5);
+        }
+
+        .btn-download {
+            background: #10b981;
+            color: white;
+            display: none;
+            margin-top: 15px;
+        }
+
+        /* Stats & Progress */
+        .stats {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            margin-top: 15px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* Footer CTA */
+        footer {
+            margin-top: auto;
+            padding: 30px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .cta-text {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .cta-link {
+            color: #60a5fa;
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+
+        .cta-link:hover {
+            text-decoration: underline;
+            color: #93c5fd;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .tool-card { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="https://aifura.com" class="logo">AiFura Tools</a>
+        <button class="lang-switch" onclick="toggleLanguage()">English</button>
+    </header>
+
+    <div class="container">
+        <h1 id="hero-title">在线 PDF 压缩工具</h1>
+        <p class="subtitle" id="hero-subtitle">安全、快速、免费。直接在浏览器中处理，文件无需上传。</p>
+
+        <div class="tool-card">
+            <input type="file" id="file-input" accept=".pdf" style="display: none;">
+            
+            <div class="drop-zone" id="drop-zone">
+                <span class="icon-upload">📄</span>
+                <p id="drop-text">点击或拖拽 PDF 文件到这里</p>
+            </div>
+
+            <div class="controls" id="controls">
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span id="quality-label">压缩质量: 标准</span>
+                        <span id="quality-value">70%</span>
+                    </div>
+                    <input type="range" id="quality-slider" min="10" max="100" value="70">
+                </div>
+                
+                <div class="stats" id="file-info">
+                    <span id="original-size">原始大小: 0 MB</span>
+                </div>
+
+                <button class="btn-action btn-compress" id="compress-btn" onclick="startCompression()">开始压缩</button>
+                
+                <div class="progress-bar" id="progress-container">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+
+                <div class="stats" id="result-stats" style="color: #10b981; font-weight: bold;"></div>
+                <button class="btn-action btn-download" id="download-btn">下载压缩后的文件</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p class="cta-text">
+            <span id="cta-prefix">更多 AI 生成的工具，请访问：</span>
+            <a href="https://aifura.com" class="cta-link" target="_blank">aifura.com</a>
+        </p>
+    </footer>
+
+    <script>
+        // --- Configuration & State ---
+        let currentLang = 'zh';
+        let currentFile = null;
+        let pdfDoc = null;
+
+        // Initialize PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // --- Localization Data ---
+        const translations = {
+            zh: {
+                title: "免费在线 PDF 压缩工具 - 极速瘦身，保护隐私",
+                desc: "最安全的在线 PDF 压缩器。无需上传服务器，本地浏览器直接处理。支持批量压缩，保持高画质。",
+                heroTitle: "在线 PDF 压缩工具",
+                heroSubtitle: "安全、快速、免费。直接在浏览器中处理，文件无需上传。",
+                dropText: "点击或拖拽 PDF 文件到这里",
+                qualityLabel: "压缩质量",
+                levels: { high: "高画质", standard: "标准", low: "强力压缩" },
+                originalSize: "原始大小",
+                btnCompress: "开始压缩",
+                btnCompressing: "正在处理...",
+                btnDownload: "下载压缩后的文件",
+                ctaPrefix: "更多 AI 生成的工具，请访问：",
+                langBtn: "English",
+                resultText: "压缩完成！从 {old} 减少到 {new} (节省了 {percent}%)"
+            },
+            en: {
+                title: "Free Online PDF Compressor - Fast & Secure",
+                desc: "Secure online PDF compressor. Process locally in browser, no server upload. High quality compression.",
+                heroTitle: "Online PDF Compressor",
+                heroSubtitle: "Secure, fast, and free. Processed directly in your browser.",
+                dropText: "Click or Drag PDF file here",
+                qualityLabel: "Compression Quality",
+                levels: { high: "High Quality", standard: "Standard", low: "High Compression" },
+                originalSize: "Original Size",
+                btnCompress: "Compress PDF",
+                btnCompressing: "Processing...",
+                btnDownload: "Download Compressed PDF",
+                ctaPrefix: "More AI-generated tools at:",
+                langBtn: "中文",
+                resultText: "Done! Reduced from {old} to {new} (Saved {percent}%)"
+            }
+        };
+
+        // --- UI Functions ---
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            updateUI();
+        }
+
+        function updateUI() {
+            const t = translations[currentLang];
+            
+            // SEO Meta Updates
+            document.title = t.title;
+            document.querySelector('meta[name="description"]').setAttribute("content", t.desc);
+            document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+
+            // Text Updates
+            document.querySelector('.lang-switch').innerText = t.langBtn;
+            document.getElementById('hero-title').innerText = t.heroTitle;
+            document.getElementById('hero-subtitle').innerText = t.heroSubtitle;
+            document.getElementById('drop-text').innerText = currentFile ? currentFile.name : t.dropText;
+            document.getElementById('cta-prefix').innerText = t.ctaPrefix;
+            
+            // Re-update dynamic slider label
+            updateSliderLabel();
+
+            const compressBtn = document.getElementById('compress-btn');
+            if (!compressBtn.disabled) compressBtn.innerText = t.btnCompress;
+            document.getElementById('download-btn').innerText = t.btnDownload;
+
+            if (document.getElementById('original-size').innerText.includes(':')) {
+                 document.getElementById('original-size').innerText = `${t.originalSize}: ${formatBytes(currentFile?.size || 0)}`;
+            }
+        }
+
+        function updateSliderLabel() {
+            const val = document.getElementById('quality-slider').value;
+            const t = translations[currentLang];
+            let levelText = t.levels.standard;
+            if (val > 85) levelText = t.levels.high;
+            if (val < 50) levelText = t.levels.low;
+            
+            document.getElementById('quality-label').innerText = `${t.qualityLabel}: ${levelText}`;
+            document.getElementById('quality-value').innerText = `${val}%`;
+        }
+
+        // --- File Handling ---
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            handleFile(e.dataTransfer.files[0]);
+        });
+
+        fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+
+        document.getElementById('quality-slider').addEventListener('input', updateSliderLabel);
+
+        function handleFile(file) {
+            if (file && file.type === 'application/pdf') {
+                currentFile = file;
+                const t = translations[currentLang];
+                
+                document.getElementById('drop-text').innerText = file.name;
+                document.getElementById('controls').style.display = 'block';
+                document.getElementById('file-info').style.display = 'block';
+                document.getElementById('original-size').innerText = `${t.originalSize}: ${formatBytes(file.size)}`;
+                
+                // Reset states
+                document.getElementById('download-btn').style.display = 'none';
+                document.getElementById('result-stats').innerText = '';
+                document.getElementById('progress-container').style.display = 'none';
+            } else {
+                alert('Please upload a valid PDF file.');
+            }
+        }
+
+        // --- Core Compression Logic ---
+        async function startCompression() {
+            if (!currentFile) return;
+
+            const t = translations[currentLang];
+            const btn = document.getElementById('compress-btn');
+            const progressBar = document.getElementById('progress-container');
+            const progressFill = document.getElementById('progress-fill');
+            
+            btn.disabled = true;
+            btn.innerText = t.btnCompressing;
+            progressBar.style.display = 'block';
+            progressFill.style.width = '0%';
+
+            try {
+                // 1. 读取 PDF
+                const arrayBuffer = await currentFile.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                const totalPages = pdf.numPages;
+
+                // 2. 初始化 jsPDF (使用 pt 单位，保持尺寸准确)
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({ unit: 'pt' }); 
+
+                // 获取滑块数值 (10 - 100)
+                const sliderValue = parseInt(document.getElementById('quality-slider').value);
+                const quality = sliderValue / 100;
+
+                // --- 【核心优化】动态计算清晰度 (Scale) ---
+                // 逻辑：滑块越高，不仅压缩率越小，生成的图片像素也越高
+                let renderScale = 1.5; // 默认值
+                
+                if (sliderValue >= 90) {
+                    renderScale = 3.0; // 极致高清 (适合打印)
+                } else if (sliderValue >= 70) {
+                    renderScale = 2.0; // 高清 (适合电脑阅读)
+                } else if (sliderValue >= 40) {
+                    renderScale = 1.5; // 平衡
+                } else {
+                    renderScale = 1.0; // 强力压缩 (只看内容，不看细节)
+                }
+                
+                // 3. 处理每一页
+                for (let i = 1; i <= totalPages; i++) {
+                    const page = await pdf.getPage(i);
+                    
+                    // viewportOriginal: 获取原始物理尺寸
+                    const viewportOriginal = page.getViewport({ scale: 1 });
+                    
+                    // viewportRender: 使用动态计算的高清倍率进行渲染
+                    const viewportRender = page.getViewport({ scale: renderScale });
+                    
+                    const width = viewportOriginal.width;
+                    const height = viewportOriginal.height;
+                    const orientation = width > height ? 'l' : 'p'; 
+
+                    // 创建 Canvas
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewportRender.height;
+                    canvas.width = viewportRender.width;
+
+                    // 渲染页面到 Canvas
+                    await page.render({ canvasContext: context, viewport: viewportRender }).promise;
+
+                    // 转换为 JPEG
+                    const imgData = canvas.toDataURL('image/jpeg', quality);
+
+                    // 添加页面 (保持原始尺寸)
+                    doc.addPage([width, height], orientation);
+                    doc.addImage(imgData, 'JPEG', 0, 0, width, height, null, 'FAST');
+
+                    // 更新进度条
+                    progressFill.style.width = `${(i / totalPages) * 100}%`;
+                }
+
+                // 循环结束，删除默认空白页
+                doc.deletePage(1);
+
+                // 4. 输出
+                const compressedBlob = doc.output('blob');
+                
+                // 统计
+                const originalSize = currentFile.size;
+                const newSize = compressedBlob.size;
+                const percentSaved = ((originalSize - newSize) / originalSize * 100).toFixed(1);
+
+                // 更新 UI
+                const downloadBtn = document.getElementById('download-btn');
+                downloadBtn.style.display = 'block';
+                downloadBtn.onclick = () => {
+                    doc.save(`compressed_${currentFile.name}`);
+                };
+
+                const resultText = t.resultText
+                    .replace('{old}', formatBytes(originalSize))
+                    .replace('{new}', formatBytes(newSize))
+                    .replace('{percent}', percentSaved);
+                
+                document.getElementById('result-stats').innerText = resultText;
+
+            } catch (error) {
+                console.error(error);
+                alert("An error occurred: " + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = t.btnCompress;
+            }
+        }
+
+        function formatBytes(bytes, decimals = 2) {
+            if (!+bytes) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+        }
+
+        // Initial UI Set
+        updateSliderLabel();
+    </script>
+</body>
+</html>
