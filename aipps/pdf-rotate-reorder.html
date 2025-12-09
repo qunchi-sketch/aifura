@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>PDF 页面旋转 & 排序工具 - Aifura Tools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="description" content="在浏览器中旋转 PDF 页面、调整顺序、删除页面并导出新 PDF。Rotate, reorder and delete PDF pages directly in your browser.">
+  <meta name="keywords" content="PDF rotate, PDF reorder, PDF delete pages, 在线PDF工具, Aifura, AIPP">
+  <meta name="author" content="Aifura">
+
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color-scheme: light dark;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      background: #0f172a;
+      color: #e5e7eb;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+    }
+    .app {
+      max-width: 1100px;
+      width: 100%;
+      margin: 16px;
+      padding: 20px;
+      border-radius: 16px;
+      background: radial-gradient(circle at top left, #1d4ed8 0, #020617 55%);
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 1.5rem;
+    }
+    .subtitle {
+      font-size: 0.9rem;
+      color: #9ca3af;
+      margin-bottom: 6px;
+    }
+    .brand {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-top: 8px;
+    }
+    .brand a {
+      color: #60a5fa;
+      text-decoration: none;
+    }
+    .brand a:hover { text-decoration: underline; }
+
+    button {
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.8rem;
+      padding: 6px 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s, transform 0.1s, border-color 0.15s, opacity 0.15s;
+    }
+    button:hover:not(:disabled) {
+      background: #1d4ed8;
+      border-color: #60a5fa;
+      transform: translateY(-1px);
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+    button.danger {
+      border-color: #f97373;
+      color: #fecaca;
+    }
+    button.danger:hover:not(:disabled) {
+      background: #b91c1c;
+      border-color: #fecaca;
+    }
+    button.primary {
+      border-color: #38bdf8;
+      background: #0ea5e9;
+    }
+    button.primary:hover:not(:disabled) {
+      background: #22c55e;
+      border-color: #bbf7d0;
+    }
+    .lang-toggle {
+      font-size: 0.8rem;
+      padding: 6px 12px;
+    }
+
+    .upload-area {
+      margin-top: 12px;
+      padding: 18px;
+      border-radius: 12px;
+      border: 1px dashed rgba(148, 163, 184, 0.8);
+      background: rgba(15, 23, 42, 0.7);
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .upload-area.dragover {
+      border-color: #60a5fa;
+      background: rgba(15, 23, 42, 0.9);
+    }
+    .upload-area p {
+      margin: 4px 0;
+      font-size: 0.9rem;
+    }
+    .upload-area small {
+      color: #9ca3af;
+      font-size: 0.75rem;
+    }
+    .hidden-input {
+      display: none;
+    }
+
+    .file-info {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: #e5e7eb;
+    }
+
+    .toolbar {
+      margin-top: 16px;
+      padding: 10px;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.9);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .toolbar-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .toolbar-label {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-right: 4px;
+    }
+    .status {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+
+    .pages-container {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+      max-height: 60vh;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .page-card {
+      position: relative;
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      cursor: grab;
+    }
+    .page-card.dragging {
+      opacity: 0.6;
+      border-style: dashed;
+    }
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      font-size: 0.8rem;
+    }
+    .page-header-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .page-index {
+      font-weight: 600;
+    }
+    .page-original {
+      color: #9ca3af;
+      font-size: 0.75rem;
+    }
+
+    .page-preview {
+      margin-top: 4px;
+      margin-bottom: 4px;
+      height: 120px;
+      border-radius: 8px;
+      border: 1px solid rgba(51, 65, 85, 0.9);
+      background: #020617;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .page-preview canvas {
+      max-width: 100%;
+      max-height: 100%;
+      transition: transform 0.2s;
+      transform-origin: center center;
+      background: #111827;
+    }
+    .page-rotation-tag {
+      position: absolute;
+      right: 6px;
+      bottom: 6px;
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: rgba(37, 99, 235, 0.9);
+      color: #e5e7eb;
+    }
+
+    .page-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .page-actions button {
+      flex: 1;
+      min-width: 0;
+      justify-content: center;
+    }
+    .page-delete {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+    }
+
+    @media (max-width: 640px) {
+      .app {
+        margin: 8px;
+        padding: 14px;
+      }
+      .toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .header-top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+
+  <!-- pdf-lib：用于重新生成 PDF -->
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <!-- pdf.js：用于页面缩略图渲染 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="header-top">
+      <div>
+        <h1 id="title"></h1>
+        <div id="subtitle" class="subtitle"></div>
+      </div>
+      <button id="lang-toggle-btn" class="lang-toggle">EN</button>
+    </div>
+    <div id="brand" class="brand"></div>
+  </header>
+
+  <section id="upload-section">
+    <div id="upload-area" class="upload-area">
+      <p id="upload-main"></p>
+      <p id="upload-sub"></p>
+      <small id="upload-hint"></small>
+    </div>
+    <input id="file-input" class="hidden-input" type="file" accept="application/pdf">
+    <div id="file-info" class="file-info" style="display:none;"></div>
+  </section>
+
+  <section id="controls-section" style="display:none;">
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <span id="label-select" class="toolbar-label"></span>
+        <button id="select-all-btn"></button>
+        <button id="clear-selection-btn"></button>
+      </div>
+      <div class="toolbar-group">
+        <span id="label-rotate" class="toolbar-label"></span>
+        <button id="rotate-left-selected-btn"></button>
+        <button id="rotate-right-selected-btn"></button>
+      </div>
+      <div class="toolbar-group">
+        <span id="label-pages" class="toolbar-label"></span>
+        <button id="delete-selected-btn" class="danger"></button>
+        <button id="reset-btn"></button>
+      </div>
+      <div class="toolbar-group">
+        <button id="export-btn" class="primary"></button>
+      </div>
+    </div>
+    <div id="status" class="status"></div>
+  </section>
+
+  <section id="pages-section" style="display:none;">
+    <div id="pages-container" class="pages-container"></div>
+  </section>
+</div>
+
+<script>
+(function() {
+  // ====== 语言配置 ======
+  let currentLang = 'zh';
+
+  const i18n = {
+    zh: {
+      title: 'PDF 页面旋转 & 排序工具',
+      subtitle: '在浏览器中旋转页面方向、调整顺序、删除页面，并导出新的 PDF 文件。',
+      brand: '更多实用 AIPP 工具：',
+      brandLinkText: 'aifura.com',
+      uploadMain: '点击选择 PDF 文件，或拖拽到此处',
+      uploadSub: 'Click to choose a PDF file, or drag & drop here',
+      uploadHint: '所有操作均在本地浏览器完成，文件不会被上传到服务器。',
+      labelSelect: '选择 / Select:',
+      selectAll: '全选 / Select all',
+      clearSelection: '取消选择 / Clear',
+      labelRotate: '旋转 / Rotate:',
+      rotateLeftSelected: '选中向左 90°',
+      rotateRightSelected: '选中向右 90°',
+      labelPages: '页面 / Pages:',
+      deleteSelected: '删除选中 / Delete selected',
+      resetAll: '重置全部 / Reset all',
+      exportBtn: '生成新 PDF / Export new PDF',
+      dragHint: '拖拽排序 / drag to reorder',
+      loadingParsing: '正在解析 PDF 文件，请稍候...',
+      loadedPrefix: '已加载：',
+      loadedSuffix: ' 页。可拖拽排序、旋转、删除。',
+      fileInfoPrefix: '当前文件：',
+      fileInfoMiddle: ' · 原始页数：',
+      statusPrefix: '当前页数：',
+      statusSelected: ' · 已选择：',
+      statusSuffix: ' · 修改将在导出后生效。',
+      alertPdfOnly: '只支持 PDF 文件。',
+      alertParseFail: '解析 PDF 失败，请尝试更换文件或浏览器。',
+      alertDeleteSelectFirst: '请先选择要删除的页面。',
+      alertMustKeepOne: '至少保留一页，不能删除全部页面。',
+      confirmDeletePage: '确定删除该页面吗？',
+      confirmDeleteSelectedPrefix: '确定删除选中的 ',
+      confirmDeleteSelectedSuffix: ' 个页面吗？',
+      confirmReset: '确定重置所有页面顺序与旋转吗？',
+      alertNeedFile: '请先加载 PDF 文件。',
+      alertRotateSelectFirst: '请先选择要旋转的页面。',
+      exportGenerating: '正在生成新的 PDF，请稍候...',
+      exportGeneratingBtn: '正在生成... / Exporting...',
+      exportDone: '已生成新 PDF，请在下载列表中查看。',
+      exportFail: '生成 PDF 失败，请尝试减小文件大小或更换浏览器。'
+    },
+    en: {
+      title: 'PDF Page Rotator & Reorder Tool',
+      subtitle: 'Rotate page orientation, reorder and delete pages in your browser, then export a new PDF.',
+      brand: 'More useful AIPP tools:',
+      brandLinkText: 'aifura.com',
+      uploadMain: 'Click to choose a PDF file, or drag & drop here',
+      uploadSub: '点击选择 PDF 文件，或拖拽到此处',
+      uploadHint: 'All operations are performed locally in your browser. Your file is never uploaded.',
+      labelSelect: 'Select:',
+      selectAll: 'Select all',
+      clearSelection: 'Clear selection',
+      labelRotate: 'Rotate:',
+      rotateLeftSelected: 'Rotate selected -90°',
+      rotateRightSelected: 'Rotate selected +90°',
+      labelPages: 'Pages:',
+      deleteSelected: 'Delete selected',
+      resetAll: 'Reset all',
+      exportBtn: 'Export new PDF',
+      dragHint: 'Drag to reorder',
+      loadingParsing: 'Parsing PDF file, please wait...',
+      loadedPrefix: 'Loaded: ',
+      loadedSuffix: ' pages. You can drag to reorder, rotate or delete.',
+      fileInfoPrefix: 'Current file: ',
+      fileInfoMiddle: ' · Original pages: ',
+      statusPrefix: 'Current pages: ',
+      statusSelected: ' · Selected: ',
+      statusSuffix: ' · Changes will apply in the exported PDF.',
+      alertPdfOnly: 'Only PDF files are supported.',
+      alertParseFail: 'Failed to parse PDF. Please try another file or browser.',
+      alertDeleteSelectFirst: 'Please select pages to delete first.',
+      alertMustKeepOne: 'At least one page must remain.',
+      confirmDeletePage: 'Delete this page?',
+      confirmDeleteSelectedPrefix: 'Delete ',
+      confirmDeleteSelectedSuffix: ' selected pages?',
+      confirmReset: 'Reset all page order and rotation?',
+      alertNeedFile: 'Please load a PDF file first.',
+      alertRotateSelectFirst: 'Please select pages to rotate.',
+      exportGenerating: 'Generating new PDF, please wait...',
+      exportGeneratingBtn: 'Exporting...',
+      exportDone: 'New PDF generated. Check your downloads.',
+      exportFail: 'Failed to export PDF. Try a smaller file or another browser.'
+    }
+  };
+
+  // ====== DOM 元素 ======
+  const titleEl = document.getElementById('title');
+  const subtitleEl = document.getElementById('subtitle');
+  const brandEl = document.getElementById('brand');
+  const langToggleBtn = document.getElementById('lang-toggle-btn');
+
+  const uploadArea = document.getElementById('upload-area');
+  const uploadMainEl = document.getElementById('upload-main');
+  const uploadSubEl = document.getElementById('upload-sub');
+  const uploadHintEl = document.getElementById('upload-hint');
+  const fileInput = document.getElementById('file-input');
+  const fileInfo = document.getElementById('file-info');
+
+  const controlsSection = document.getElementById('controls-section');
+  const pagesSection = document.getElementById('pages-section');
+  const pagesContainer = document.getElementById('pages-container');
+  const statusEl = document.getElementById('status');
+
+  const labelSelectEl = document.getElementById('label-select');
+  const labelRotateEl = document.getElementById('label-rotate');
+  const labelPagesEl = document.getElementById('label-pages');
+
+  const selectAllBtn = document.getElementById('select-all-btn');
+  const clearSelectionBtn = document.getElementById('clear-selection-btn');
+  const rotateLeftSelectedBtn = document.getElementById('rotate-left-selected-btn');
+  const rotateRightSelectedBtn = document.getElementById('rotate-right-selected-btn');
+  const deleteSelectedBtn = document.getElementById('delete-selected-btn');
+  const resetBtn = document.getElementById('reset-btn');
+  const exportBtn = document.getElementById('export-btn');
+
+  // pdf.js worker
+  if (window['pdfjsLib']) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+  }
+
+  // ====== 状态变量 ======
+  let originalPdfBytes = null;
+  let originalPageCount = 0;
+  let originalFileName = 'document.pdf';
+  let pdfJsDoc = null;
+
+  /**
+   * 页面状态：
+   * pages = [ { id, originalIndex, rotation, selected } ]
+   */
+  let pages = [];
+  let dragSrcId = null;
+
+  // ====== 语言应用 ======
+  function applyLanguage() {
+    const dict = i18n[currentLang];
+
+    titleEl.textContent = dict.title;
+    subtitleEl.textContent = dict.subtitle;
+
+    brandEl.innerHTML = '';
+    const prefix = document.createTextNode(dict.brand + ' ');
+    const link = document.createElement('a');
+    link.href = 'https://aifura.com';
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.textContent = dict.brandLinkText;
+    brandEl.appendChild(prefix);
+    brandEl.appendChild(link);
+
+    uploadMainEl.textContent = dict.uploadMain;
+    uploadSubEl.textContent = dict.uploadSub;
+    uploadHintEl.textContent = dict.uploadHint;
+
+    labelSelectEl.textContent = dict.labelSelect;
+    labelRotateEl.textContent = dict.labelRotate;
+    labelPagesEl.textContent = dict.labelPages;
+
+    selectAllBtn.textContent = dict.selectAll;
+    clearSelectionBtn.textContent = dict.clearSelection;
+    rotateLeftSelectedBtn.textContent = dict.rotateLeftSelected;
+    rotateRightSelectedBtn.textContent = dict.rotateRightSelected;
+    deleteSelectedBtn.textContent = dict.deleteSelected;
+    resetBtn.textContent = dict.resetAll;
+    exportBtn.textContent = dict.exportBtn;
+
+    langToggleBtn.textContent = currentLang === 'zh' ? 'EN' : '中';
+
+    // 更新已有状态文本
+    if (originalPdfBytes && originalPageCount) {
+      fileInfo.textContent =
+        dict.fileInfoPrefix + originalFileName +
+        dict.fileInfoMiddle + originalPageCount;
+    }
+    updateStatus();
+  }
+
+  langToggleBtn.addEventListener('click', () => {
+    currentLang = currentLang === 'zh' ? 'en' : 'zh';
+    applyLanguage();
+  });
+
+  // 初始语言
+  applyLanguage();
+
+  // ====== 上传逻辑 ======
+  uploadArea.addEventListener('click', () => fileInput.click());
+
+  uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    uploadArea.classList.add('dragover');
+  });
+
+  uploadArea.addEventListener('dragleave', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    uploadArea.classList.remove('dragover');
+  });
+
+  uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    uploadArea.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      handleFile(file);
+    }
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      handleFile(file);
+    }
+  });
+
+  function handleFile(file) {
+    const dict = i18n[currentLang];
+    if (file.type !== 'application/pdf') {
+      alert(dict.alertPdfOnly);
+      return;
+    }
+    originalFileName = file.name || 'document.pdf';
+    const reader = new FileReader();
+    reader.onload = async function(ev) {
+      originalPdfBytes = new Uint8Array(ev.target.result);
+      try {
+        statusEl.textContent = dict.loadingParsing;
+        const { PDFDocument } = PDFLib;
+        const pdfDoc = await PDFDocument.load(originalPdfBytes);
+        originalPageCount = pdfDoc.getPageCount();
+
+        // 使用 pdf.js 加载用于缩略图
+        if (window['pdfjsLib']) {
+          pdfJsDoc = await pdfjsLib.getDocument({ data: originalPdfBytes }).promise;
+        } else {
+          pdfJsDoc = null;
+        }
+
+        initPagesState(originalPageCount);
+        renderFileInfo();
+        renderPages();
+        controlsSection.style.display = '';
+        pagesSection.style.display = '';
+        statusEl.textContent = dict.loadedPrefix + originalPageCount + dict.loadedSuffix;
+      } catch (err) {
+        console.error(err);
+        alert(dict.alertParseFail);
+        statusEl.textContent = '';
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function initPagesState(pageCount) {
+    pages = [];
+    for (let i = 0; i < pageCount; i++) {
+      pages.push({
+        id: 'page-' + i,
+        originalIndex: i,
+        rotation: 0,
+        selected: false
+      });
+    }
+  }
+
+  function renderFileInfo() {
+    const dict = i18n[currentLang];
+    fileInfo.style.display = '';
+    fileInfo.textContent =
+      dict.fileInfoPrefix + originalFileName +
+      dict.fileInfoMiddle + originalPageCount;
+  }
+
+  // ====== 页面渲染 ======
+  function renderPages() {
+    const dict = i18n[currentLang];
+    pagesContainer.innerHTML = '';
+    pages.forEach((page, index) => {
+      const card = document.createElement('div');
+      card.className = 'page-card';
+      card.setAttribute('draggable', 'true');
+      card.dataset.pageId = page.id;
+
+      // 拖拽事件
+      card.addEventListener('dragstart', (e) => {
+        dragSrcId = page.id;
+        card.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      card.addEventListener('dragend', () => {
+        card.classList.remove('dragging');
+      });
+      card.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+      });
+      card.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const targetId = card.dataset.pageId;
+        if (dragSrcId && dragSrcId !== targetId) {
+          reorderPages(dragSrcId, targetId);
+        }
+        dragSrcId = null;
+      });
+
+      // 页头
+      const header = document.createElement('div');
+      header.className = 'page-header';
+
+      const headerLeft = document.createElement('div');
+      headerLeft.className = 'page-header-left';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = page.selected;
+      checkbox.addEventListener('change', () => {
+        page.selected = checkbox.checked;
+        updateStatus();
+      });
+
+      const indexSpan = document.createElement('span');
+      indexSpan.className = 'page-index';
+      indexSpan.textContent = '#' + (index + 1);
+
+      const originalSpan = document.createElement('span');
+      originalSpan.className = 'page-original';
+      originalSpan.textContent =
+        (currentLang === 'zh' ? '原始：' : 'original: ') + (page.originalIndex + 1);
+
+      headerLeft.appendChild(checkbox);
+      headerLeft.appendChild(indexSpan);
+      headerLeft.appendChild(originalSpan);
+
+      header.appendChild(headerLeft);
+
+      const dragHint = document.createElement('span');
+      dragHint.className = 'page-original';
+      dragHint.textContent = dict.dragHint;
+      header.appendChild(dragHint);
+
+      // 预览（缩略图）
+      const preview = document.createElement('div');
+      preview.className = 'page-preview';
+
+      const canvas = document.createElement('canvas');
+      preview.appendChild(canvas);
+
+      const rotationTag = document.createElement('div');
+      rotationTag.className = 'page-rotation-tag';
+      const normalizedRotation = normalizeRotation(page.rotation);
+      rotationTag.textContent = normalizedRotation + '°';
+      canvas.style.transform = 'rotate(' + normalizedRotation + 'deg)';
+
+      preview.appendChild(rotationTag);
+
+      // 渲染缩略图
+      renderThumbnail(page.originalIndex, canvas);
+
+      // 操作按钮
+      const actions = document.createElement('div');
+      actions.className = 'page-actions';
+
+      const rotateLeftBtn = document.createElement('button');
+      rotateLeftBtn.textContent =
+        currentLang === 'zh' ? '⟲ 左 90°' : '⟲ -90°';
+      rotateLeftBtn.addEventListener('click', () => {
+        rotatePage(page, -90);
+      });
+
+      const rotateRightBtn = document.createElement('button');
+      rotateRightBtn.textContent =
+        currentLang === 'zh' ? '右 90° ⟳' : '+90° ⟳';
+      rotateRightBtn.addEventListener('click', () => {
+        rotatePage(page, 90);
+      });
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'danger';
+      deleteBtn.textContent = currentLang === 'zh' ? '删除' : 'Delete';
+      deleteBtn.addEventListener('click', () => {
+        deleteSinglePage(page);
+      });
+
+      actions.appendChild(rotateLeftBtn);
+      actions.appendChild(rotateRightBtn);
+      actions.appendChild(deleteBtn);
+
+      // 右上角删除按钮
+      const deleteIconBtn = document.createElement('button');
+      deleteIconBtn.className = 'page-delete danger';
+      deleteIconBtn.textContent = '✕';
+      deleteIconBtn.title =
+        currentLang === 'zh' ? '删除当前页面' : 'Delete this page';
+      deleteIconBtn.addEventListener('click', () => {
+        deleteSinglePage(page);
+      });
+
+      card.appendChild(header);
+      card.appendChild(preview);
+      card.appendChild(actions);
+      card.appendChild(deleteIconBtn);
+
+      pagesContainer.appendChild(card);
+    });
+
+    updateStatus();
+  }
+
+  function renderThumbnail(originalIndex, canvas) {
+    if (!pdfJsDoc || !canvas) return;
+    pdfJsDoc.getPage(originalIndex + 1).then((page) => {
+      const viewport = page.getViewport({ scale: 1 });
+      const maxWidth = 140;
+      const scale = maxWidth / viewport.width;
+      const scaledViewport = page.getViewport({ scale });
+
+      const context = canvas.getContext('2d');
+      canvas.width = scaledViewport.width;
+      canvas.height = scaledViewport.height;
+
+      const renderContext = {
+        canvasContext: context,
+        viewport: scaledViewport
+      };
+      page.render(renderContext);
+    }).catch((err) => {
+      console.warn('Thumbnail render error:', err);
+    });
+  }
+
+  function rotatePage(page, deltaDeg) {
+    page.rotation = normalizeRotation(page.rotation + deltaDeg);
+    renderPages();
+  }
+
+  function normalizeRotation(deg) {
+    let result = deg % 360;
+    if (result < 0) result += 360;
+    const allowed = [0, 90, 180, 270];
+    let closest = allowed[0];
+    let minDiff = Math.abs(result - allowed[0]);
+    for (let i = 1; i < allowed.length; i++) {
+      const diff = Math.abs(result - allowed[i]);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closest = allowed[i];
+      }
+    }
+    return closest;
+  }
+
+  function reorderPages(srcId, targetId) {
+    const srcIndex = pages.findIndex(p => p.id === srcId);
+    const targetIndex = pages.findIndex(p => p.id === targetId);
+    if (srcIndex === -1 || targetIndex === -1) return;
+    const [moved] = pages.splice(srcIndex, 1);
+    pages.splice(targetIndex, 0, moved);
+    renderPages();
+  }
+
+  function deleteSinglePage(page) {
+    const dict = i18n[currentLang];
+    if (pages.length <= 1) {
+      alert(dict.alertMustKeepOne);
+      return;
+    }
+    const ok = confirm(dict.confirmDeletePage);
+    if (!ok) return;
+    pages = pages.filter(p => p.id !== page.id);
+    renderPages();
+  }
+
+  function deleteSelectedPages() {
+    const dict = i18n[currentLang];
+    const selectedCount = pages.filter(p => p.selected).length;
+    if (!selectedCount) {
+      alert(dict.alertDeleteSelectFirst);
+      return;
+    }
+    if (pages.length - selectedCount < 1) {
+      alert(dict.alertMustKeepOne);
+      return;
+    }
+    const ok = confirm(
+      dict.confirmDeleteSelectedPrefix +
+      selectedCount +
+      dict.confirmDeleteSelectedSuffix
+    );
+    if (!ok) return;
+    pages = pages.filter(p => !p.selected);
+    renderPages();
+  }
+
+  function updateStatus() {
+    const dict = i18n[currentLang];
+    const selectedCount = pages.filter(p => p.selected).length;
+    if (!pages.length) {
+      statusEl.textContent = '';
+      return;
+    }
+    statusEl.textContent =
+      dict.statusPrefix + pages.length +
+      dict.statusSelected + selectedCount +
+      dict.statusSuffix;
+  }
+
+  // ====== 工具栏事件 ======
+  selectAllBtn.addEventListener('click', () => {
+    pages.forEach(p => p.selected = true);
+    renderPages();
+  });
+
+  clearSelectionBtn.addEventListener('click', () => {
+    pages.forEach(p => p.selected = false);
+    renderPages();
+  });
+
+  rotateLeftSelectedBtn.addEventListener('click', () => {
+    const dict = i18n[currentLang];
+    let any = false;
+    pages.forEach(p => {
+      if (p.selected) {
+        p.rotation = normalizeRotation(p.rotation - 90);
+        any = true;
+      }
+    });
+    if (!any) {
+      alert(dict.alertRotateSelectFirst);
+      return;
+    }
+    renderPages();
+  });
+
+  rotateRightSelectedBtn.addEventListener('click', () => {
+    const dict = i18n[currentLang];
+    let any = false;
+    pages.forEach(p => {
+      if (p.selected) {
+        p.rotation = normalizeRotation(p.rotation + 90);
+        any = true;
+      }
+    });
+    if (!any) {
+      alert(dict.alertRotateSelectFirst);
+      return;
+    }
+    renderPages();
+  });
+
+  deleteSelectedBtn.addEventListener('click', () => {
+    deleteSelectedPages();
+  });
+
+  resetBtn.addEventListener('click', () => {
+    const dict = i18n[currentLang];
+    if (!originalPdfBytes) return;
+    const ok = confirm(dict.confirmReset);
+    if (!ok) return;
+    initPagesState(originalPageCount);
+    renderPages();
+  });
+
+  // ====== 导出逻辑 ======
+  exportBtn.addEventListener('click', async () => {
+    const dict = i18n[currentLang];
+    if (!originalPdfBytes || !pages.length) {
+      alert(dict.alertNeedFile);
+      return;
+    }
+    try {
+      exportBtn.disabled = true;
+      exportBtn.textContent = dict.exportGeneratingBtn;
+      statusEl.textContent = dict.exportGenerating;
+
+      const { PDFDocument, degrees } = PDFLib;
+      const oldPdfDoc = await PDFDocument.load(originalPdfBytes);
+      const newPdfDoc = await PDFDocument.create();
+
+      for (const p of pages) {
+        const [copiedPage] = await newPdfDoc.copyPages(oldPdfDoc, [p.originalIndex]);
+        if (p.rotation && p.rotation % 360 !== 0) {
+          copiedPage.setRotation(degrees(normalizeRotation(p.rotation)));
+        }
+        newPdfDoc.addPage(copiedPage);
+      }
+
+      const newPdfBytes = await newPdfDoc.save();
+      const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      const baseName = originalFileName.replace(/\.pdf$/i, '');
+      a.href = url;
+      a.download = baseName + '_rotated_reordered.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      statusEl.textContent = dict.exportDone;
+    } catch (err) {
+      console.error(err);
+      alert(i18n[currentLang].exportFail);
+      statusEl.textContent = '';
+    } finally {
+      exportBtn.disabled = false;
+      exportBtn.textContent = i18n[currentLang].exportBtn;
+    }
+  });
+
+})();
+</script>
+</body>
+</html>
