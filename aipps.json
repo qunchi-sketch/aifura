@@ -124,9 +124,25 @@
   "heat": 85,
   "author": "Qun",
   "contact": "mailto:chiqun1995@foxmail.com"
+},
+  {
+  "id": "pdf-rotate-reorder",
+  "title": "PDF Page Rotator & Reorder Tool",
+  "title_cn": "PDF 页面旋转与排序工具",
+  "description": "Rotate PDF pages, reorder them by dragging, delete unwanted pages, and export a new PDF. Works 100% locally in your browser.",
+  "description_cn": "支持旋转 PDF 页面、拖拽调整顺序、删除多余页面，并导出新的 PDF 文件。所有操作均在浏览器本地完成，不会上传文件。",
+  "tags": ["pdf", "rotate", "reorder", "delete", "pages"],
+  "fileUrl": "aipps/pdf-rotate-reorder.html",
+  "uploadTime": "2025-12-09T00:00:00Z",
+  "stars": 5,
+  "heat": 95,
+  "author": "Qun",
+  "contact": "mailto:chiqun1995@foxmail.com"
 }
 
+
 ]
+
 
 
 
