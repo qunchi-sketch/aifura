@@ -138,10 +138,26 @@
   "heat": 95,
   "author": "Qun",
   "contact": "mailto:chiqun1995@foxmail.com"
+},
+  {
+  "id": "bg-remover-server",
+  "title": "AI Background Remover (Server)",
+  "title_cn": "AI 智能抠图（服务器版）",
+  "description": "Upload an image and remove the background via AI server.(we won't save your data)",
+  "description_cn": "上传图片，由服务器上的 AI 模型完成抠图，返回透明 PNG。我们不会保存您的数据",
+  "tags": ["image", "background", "remove", "server"],
+  "fileUrl": "aipps/remove-bg-server.html",
+  "uploadTime": "2025-12-10T00:00:00Z",
+  "stars": 5,
+  "heat": 198,
+  "author": "Qun",
+  "contact": "mailto:chiqun1995@foxmail.com"
 }
 
 
+
 ]
+
 
 
 
