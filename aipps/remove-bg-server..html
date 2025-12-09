@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI 智能抠图（服务器版） - Aifura Tools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta id="metaDesc" name="description" content="上传图片，由你的服务器上的 AI 模型完成抠图，返回透明 PNG。">
+  <meta name="robots" content="index,follow" />
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 16px;
+      background: radial-gradient(circle at top, #192042 0, #050715 50%, #02030a 100%);
+      color: #f5f5f5;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: rgba(13, 16, 36, 0.96);
+      border-radius: 20px;
+      padding: 24px 24px 20px;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6);
+      position: relative;
+      border: 1px solid rgba(120, 130, 255, 0.18);
+    }
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 24px;
+      letter-spacing: 0.02em;
+    }
+    p {
+      color: #c5c5d5;
+      margin-top: 0;
+      font-size: 13px;
+    }
+    .lang-toggle {
+      display: inline-flex;
+      border-radius: 999px;
+      padding: 2px;
+      background: #1f2435;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .lang-btn {
+      border: none;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: transparent;
+      color: #c5c5d5;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .lang-btn.active {
+      background: #3c4cff;
+      color: #fff;
+    }
+
+    .upload-box {
+      border-radius: 16px;
+      padding: 22px 16px 18px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, transform 0.1s;
+      margin-bottom: 16px;
+      border: 1px dashed rgba(104, 119, 255, 0.85);
+      background: radial-gradient(circle at top, rgba(79, 99, 255, 0.35) 0, rgba(20, 24, 50, 0.9) 45%, #0b0f23 100%);
+    }
+    .upload-box-inner {
+      max-width: 420px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .upload-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      background: rgba(10, 14, 40, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 4px;
+      box-shadow: 0 0 0 1px rgba(156, 172, 255, 0.5);
+    }
+    .upload-icon span {
+      font-size: 20px;
+    }
+    .upload-main-text {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .upload-sub-text {
+      font-size: 12px;
+      color: #aeb1d8;
+    }
+    .upload-hint {
+      font-size: 11px;
+      color: #8b8fd0;
+    }
+    .upload-box.dragover {
+      background: radial-gradient(circle at top, rgba(124, 144, 255, 0.6) 0, rgba(20, 26, 70, 0.95) 45%, #0a0d20 100%);
+      border-color: #a8b3ff;
+      transform: translateY(-1px);
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 18px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #3c4cff, #9f6bff);
+      color: #fff;
+      margin-top: 8px;
+      box-shadow: 0 8px 20px rgba(76, 97, 255, 0.4);
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .preview-area {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .preview-card {
+      background: #15192d;
+      border-radius: 14px;
+      padding: 12px;
+      min-height: 200px;
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+    .preview-card h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      color: #d7daf7;
+      letter-spacing: 0.02em;
+    }
+    .preview-card-inner {
+      border-radius: 10px;
+      background: repeating-conic-gradient(#ccc 0% 25%, transparent 0% 50%) 50% / 20px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      min-height: 180px;
+    }
+    .preview-card img {
+      max-width: 100%;
+      max-height: 360px;
+      object-fit: contain;
+      display: block;
+    }
+    .status {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #c5c5d5;
+    }
+    .footer {
+      margin-top: 20px;
+      font-size: 11px;
+      color: #8b8ba0;
+      text-align: center;
+    }
+    .link {
+      color: #9f6bff;
+      text-decoration: none;
+    }
+    @media (max-width: 720px) {
+      .preview-area {
+        grid-template-columns: 1fr;
+      }
+      .header-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-row">
+      <div>
+        <h1 id="titleText">AI 智能抠图（服务器版）</h1>
+        <p id="introText">
+          上传图片，由你的服务器上的 AI 模型完成抠图，返回透明 PNG。
+        </p>
+      </div>
+      <div class="lang-toggle">
+        <button class="lang-btn active" data-lang="zh">中文</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+      </div>
+    </div>
+
+    <label class="upload-box" id="uploadBox">
+      <div class="upload-box-inner">
+        <div class="upload-icon">
+          <span>⬆</span>
+        </div>
+        <div id="uploadMain" class="upload-main-text">点击或拖拽图片到这里上传</div>
+        <div id="uploadSub" class="upload-sub-text">支持 PNG / JPG / WEBP</div>
+        <div id="uploadHint" class="upload-hint">本地处理仅用于抠图，不会保存你的图片。</div>
+        <input type="file" id="fileInput" accept="image/*" />
+        <button type="button" class="btn" id="selectBtn">选择图片</button>
+      </div>
+    </label>
+
+    <button type="button" class="btn" id="processBtn" disabled>开始抠图</button>
+    <div class="status" id="statusText">请选择一张图片。</div>
+
+    <div class="preview-area">
+      <div class="preview-card">
+        <h3 id="originalTitle">原图</h3>
+        <div class="preview-card-inner" id="originalPreview">
+          <span id="originalPlaceholder" style="font-size:12px;color:#888;">暂无图片</span>
+        </div>
+      </div>
+      <div class="preview-card">
+        <h3 id="resultTitle">抠图结果</h3>
+        <div class="preview-card-inner" id="resultPreview">
+          <span id="resultPlaceholder" style="font-size:12px;color:#888;">等待处理</span>
+        </div>
+        <div style="margin-top:8px;">
+          <a id="downloadLink" class="link" href="#" download="removed-bg.png" style="display:none;">下载抠图图片</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span id="footerText">更多好用小工具，请访问</span>
+      <a class="link" href="https://aifura.com" target="_blank" rel="noopener">aifura.com</a>
+    </div>
+  </div>
+
+  <script>
+    // ==== 配置你的后端地址 ====
+    const API_URL = "https://api.aifura.com/remove-bg";   // TODO: 替换成你的真实 IP
+
+    const i18n = {
+      zh: {
+        documentTitle: "AI 智能抠图（服务器版） - Aifura Tools",
+        metaDescription: "上传图片，由你的服务器上的 AI 模型完成抠图，返回透明 PNG。",
+        title: "AI 智能抠图（服务器版）",
+        intro: "上传图片，由你的服务器上的 AI 模型完成抠图，返回透明 PNG。",
+        uploadMain: "点击或拖拽图片到这里上传",
+        uploadSub: "支持 PNG / JPG / WEBP",
+        uploadHint: "本地处理仅用于抠图，不会保存你的图片。",
+        selectBtn: "选择图片",
+        processBtn: "开始抠图",
+        statusInitial: "请选择一张图片。",
+        statusReady: "已选择图片，点击「开始抠图」。",
+        statusProcessing: "正在上传并抠图，请稍候……",
+        statusNoFile: "请先选择一张图片。",
+        statusSuccess: "抠图完成，可以预览或下载结果。",
+        statusErrorPrefix: "抠图失败：",
+        originalTitle: "原图",
+        resultTitle: "抠图结果",
+        originalPlaceholder: "暂无图片",
+        resultPlaceholder: "等待处理",
+        downloadText: "下载抠图图片",
+        footerText: "更多好用小工具，请访问"
+      },
+      en: {
+        documentTitle: "AI Background Remover (Server) - Aifura Tools",
+        metaDescription: "Upload an image and let your server-side AI model remove the background, returning a transparent PNG.",
+        title: "AI Background Remover (Server)",
+        intro: "Upload an image and let your server-side AI model remove the background and return a transparent PNG.",
+        uploadMain: "Click or drag an image here to upload",
+        uploadSub: "Supports PNG / JPG / WEBP",
+        uploadHint: "Images are only used for processing and are not stored.",
+        selectBtn: "Choose Image",
+        processBtn: "Remove Background",
+        statusInitial: "Please select an image.",
+        statusReady: "Image selected. Click “Remove Background”.",
+        statusProcessing: "Uploading and processing, please wait…",
+        statusNoFile: "Please select an image first.",
+        statusSuccess: "Background removed. You can preview or download the result.",
+        statusErrorPrefix: "Error: ",
+        originalTitle: "Original",
+        resultTitle: "Result",
+        originalPlaceholder: "No image yet",
+        resultPlaceholder: "Waiting for processing",
+        downloadText: "Download result image",
+        footerText: "For more handy tools, visit"
+      }
+    };
+
+    let currentLang = "zh";
+    let selectedFile = null;
+    let hasResult = false;
+
+    const uploadBox = document.getElementById('uploadBox');
+    const fileInput = document.getElementById('fileInput');
+    const selectBtn = document.getElementById('selectBtn');
+    const processBtn = document.getElementById('processBtn');
+    const statusText = document.getElementById('statusText');
+    const originalPreview = document.getElementById('originalPreview');
+    const resultPreview = document.getElementById('resultPreview');
+    const downloadLink = document.getElementById('downloadLink');
+
+    const titleText = document.getElementById('titleText');
+    const introText = document.getElementById('introText');
+    const uploadMain = document.getElementById('uploadMain');
+    const uploadSub = document.getElementById('uploadSub');
+    const uploadHint = document.getElementById('uploadHint');
+    const originalTitle = document.getElementById('originalTitle');
+    const resultTitle = document.getElementById('resultTitle');
+    const footerText = document.getElementById('footerText');
+    const metaDesc = document.getElementById('metaDesc');
+
+    function applyLang(lang) {
+      currentLang = lang;
+      const t = i18n[lang];
+
+      document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+      document.title = t.documentTitle;
+      if (metaDesc) metaDesc.setAttribute("content", t.metaDescription);
+
+      titleText.textContent = t.title;
+      introText.textContent = t.intro;
+      uploadMain.textContent = t.uploadMain;
+      uploadSub.textContent = t.uploadSub;
+      uploadHint.textContent = t.uploadHint;
+      selectBtn.textContent = t.selectBtn;
+      processBtn.textContent = t.processBtn;
+      originalTitle.textContent = t.originalTitle;
+      resultTitle.textContent = t.resultTitle;
+      footerText.textContent = t.footerText;
+      downloadLink.textContent = t.downloadText;
+
+      if (!selectedFile) {
+        originalPreview.innerHTML = "";
+        const span = document.createElement("span");
+        span.style.fontSize = "12px";
+        span.style.color = "#888";
+        span.textContent = t.originalPlaceholder;
+        originalPreview.appendChild(span);
+      }
+      if (!hasResult) {
+        resultPreview.innerHTML = "";
+        const span2 = document.createElement("span");
+        span2.style.fontSize = "12px";
+        span2.style.color = "#888";
+        span2.textContent = t.resultPlaceholder;
+        resultPreview.appendChild(span2);
+        downloadLink.style.display = "none";
+      }
+
+      if (!selectedFile && !hasResult) {
+        statusText.textContent = t.statusInitial;
+      }
+
+      document.querySelectorAll(".lang-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.getAttribute("data-lang") === lang);
+      });
+    }
+
+    function setStatus(type, extraMsg) {
+      const t = i18n[currentLang];
+      switch (type) {
+        case "initial":
+          statusText.textContent = t.statusInitial;
+          break;
+        case "ready":
+          statusText.textContent = t.statusReady;
+          break;
+        case "processing":
+          statusText.textContent = t.statusProcessing;
+          break;
+        case "noFile":
+          statusText.textContent = t.statusNoFile;
+          break;
+        case "success":
+          statusText.textContent = t.statusSuccess;
+          break;
+        case "error":
+          statusText.textContent = t.statusErrorPrefix + (extraMsg || "");
+          break;
+      }
+    }
+
+    function showOriginal(file) {
+      originalPreview.innerHTML = "";
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      originalPreview.appendChild(img);
+    }
+
+    function showResult(blob) {
+      hasResult = true;
+      resultPreview.innerHTML = "";
+      const img = document.createElement('img');
+      const url = URL.createObjectURL(blob);
+      img.src = url;
+      resultPreview.appendChild(img);
+
+      downloadLink.style.display = "inline-block";
+      downloadLink.href = url;
+    }
+
+    document.querySelectorAll(".lang-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const lang = btn.getAttribute("data-lang");
+        if (lang !== currentLang) applyLang(lang);
+      });
+    });
+
+    selectBtn.addEventListener('click', () => fileInput.click());
+    uploadBox.addEventListener('click', (e) => {
+      if (e.target === uploadBox) fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      selectedFile = file;
+      showOriginal(file);
+      processBtn.disabled = false;
+      hasResult = false;
+      resultPreview.innerHTML = "";
+      const span2 = document.createElement("span");
+      span2.style.fontSize = "12px";
+      span2.style.color = "#888";
+      span2.textContent = i18n[currentLang].resultPlaceholder;
+      resultPreview.appendChild(span2);
+      downloadLink.style.display = "none";
+      setStatus("ready");
+    });
+
+    uploadBox.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadBox.classList.add('dragover');
+    });
+    uploadBox.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      uploadBox.classList.remove('dragover');
+    });
+    uploadBox.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadBox.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (!file) return;
+      selectedFile = file;
+      fileInput.files = e.dataTransfer.files;
+      showOriginal(file);
+      processBtn.disabled = false;
+      hasResult = false;
+      resultPreview.innerHTML = "";
+      const span2 = document.createElement("span");
+      span2.style.fontSize = "12px";
+      span2.style.color = "#888";
+      span2.textContent = i18n[currentLang].resultPlaceholder;
+      resultPreview.appendChild(span2);
+      downloadLink.style.display = "none";
+      setStatus("ready");
+    });
+
+    processBtn.addEventListener('click', async () => {
+      if (!selectedFile) {
+        setStatus("noFile");
+        return;
+      }
+
+      processBtn.disabled = true;
+      setStatus("processing");
+
+      const formData = new FormData();
+      formData.append('image', selectedFile);
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || ("HTTP " + res.status));
+        }
+
+        const blob = await res.blob();
+        showResult(blob);
+        setStatus("success");
+      } catch (err) {
+        console.error(err);
+        setStatus("error", err.message);
+      } finally {
+        processBtn.disabled = false;
+      }
+    });
+
+    applyLang("zh");
+  </script>
+</body>
+</html>
