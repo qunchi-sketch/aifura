@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <!-- SEO：中英混合 -->
+  <meta charset="UTF-8" />
+  <title>PDF 页面尺寸统一工具 | PDF Page Size Resizer – 等比缩放居中 – Aifura AIPP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="index,follow" />
+  <meta name="description" content="免费在线 PDF 页面尺寸统一工具，支持将所有页面一键调整为同一尺寸（A4、Letter 或自定义），并等比缩放内容居中放置，保持文字与矢量清晰。Free online PDF page size resizer: unify all pages to A4/Letter/custom size, scale contents proportionally and center them, all in your browser." />
+  <meta name="keywords" content="PDF页面尺寸统一,PDF页面大小调整,PDF页面等比缩放,PDF页面居中,在线PDF编辑,PDF page size,resize PDF pages,scale PDF pages,center PDF content,Aifura,AIPP" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="PDF 页面尺寸统一工具 | PDF Page Size Resizer – Aifura" />
+  <meta property="og:description" content="将 PDF 全部页面统一为同一尺寸（A4 / Letter / 自定义），并等比缩放内容居中放置，全部在浏览器本地完成，不上传文件。" />
+
+  <style>
+    :root{
+      --bg:#020617;
+      --panel:#020617;
+      --border:#1f2937;
+      --accent:#38bdf8;
+      --accent-soft:rgba(56,189,248,0.15);
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+      --radius:18px;
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      min-height:100vh;
+      background:radial-gradient(circle at top,#1f2937 0,#020617 45%,#000 100%);
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+      color:var(--text);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+    }
+    .app{
+      width:100%;
+      max-width:720px;
+      background:linear-gradient(145deg,rgba(15,23,42,0.98),rgba(15,23,42,0.96));
+      border-radius:22px;
+      border:1px solid rgba(148,163,184,0.15);
+      box-shadow:0 20px 50px rgba(15,23,42,0.8);
+      padding:18px 18px 14px;
+    }
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+      border-bottom:1px solid var(--border);
+      padding-bottom:10px;
+      margin-bottom:14px;
+    }
+    .brand{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .logo{
+      width:30px;height:30px;
+      border-radius:999px;
+      background:radial-gradient(circle at 20% 0,#22d3ee,#0ea5e9 45%,#6366f1 100%);
+      display:flex;align-items:center;justify-content:center;
+      font-weight:700;font-size:15px;color:#020617;
+      box-shadow:0 10px 24px rgba(8,47,73,0.9);
+    }
+    .title-main{font-size:16px;font-weight:600;}
+    .title-sub{font-size:11px;color:var(--muted);}
+    .title-block h1{
+      margin:0;
+      font-size:18px;
+      font-weight:600;
+    }
+    .title-block p{
+      margin:2px 0 0;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .lang-toggle{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,0.6);
+      background:rgba(15,23,42,0.9);
+      font-size:11px;
+      color:var(--muted);
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .lang-toggle span{cursor:pointer;}
+    .lang-toggle .active{color:var(--accent);font-weight:600;}
+
+    .panel{
+      background:var(--panel);
+      border-radius:var(--radius);
+      border:1px solid var(--border);
+      padding:14px 14px 12px;
+      margin-bottom:10px;
+    }
+    .panel h2{
+      margin:0 0 6px;
+      font-size:13px;
+      font-weight:500;
+    }
+    .upload-area{
+      border-radius:16px;
+      border:1px dashed rgba(148,163,184,0.7);
+      padding:14px;
+      text-align:center;
+      cursor:pointer;
+      background:radial-gradient(circle at 50% 0,rgba(56,189,248,0.08),rgba(15,23,42,0.95));
+      transition:border-color .15s,background .15s,transform .1s;
+    }
+    .upload-area:hover{
+      border-color:rgba(56,189,248,0.9);
+      background:radial-gradient(circle at 50% 0,rgba(56,189,248,0.15),rgba(15,23,42,0.97));
+      transform:translateY(-1px);
+    }
+    .upload-area input{display:none;}
+    .upload-icon{font-size:22px;margin-bottom:4px;}
+    .upload-title{font-size:14px;font-weight:500;}
+    .upload-hint{font-size:11px;color:var(--muted);}
+    .file-info{margin-top:4px;font-size:11px;color:var(--muted);}
+
+    .fields{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px 10px;
+      align-items:center;
+      font-size:12px;
+      color:var(--muted);
+    }
+    select,input{
+      font-size:12px;
+      padding:5px 7px;
+      border-radius:999px;
+      border:1px solid rgba(51,65,85,0.9);
+      background:rgba(15,23,42,0.96);
+      color:var(--text);
+      min-width:0;
+    }
+    input[type="number"]{width:90px;}
+    .tip{font-size:11px;color:var(--muted);margin-top:4px;}
+
+    .btn-row{
+      margin-top:8px;
+      display:flex;
+      gap:8px;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+    }
+    button{
+      border-radius:999px;
+      border:1px solid transparent;
+      padding:6px 12px;
+      font-size:12px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      transition:background .15s,border-color .15s,transform .08s,box-shadow .15s;
+    }
+    .btn-primary{
+      background:linear-gradient(135deg,#0ea5e9,#22d3ee);
+      border-color:rgba(56,189,248,0.9);
+      color:#020617;
+      box-shadow:0 8px 20px rgba(8,47,73,0.9);
+    }
+    .btn-primary:hover{
+      background:linear-gradient(135deg,#06b6d4,#38bdf8);
+      transform:translateY(-0.5px);
+      box-shadow:0 12px 26px rgba(8,47,73,1);
+    }
+    .btn-secondary{
+      border-color:rgba(148,163,184,0.8);
+      background:rgba(15,23,42,0.95);
+      color:var(--text);
+    }
+    .btn-secondary:hover{
+      border-color:var(--accent);
+      background:var(--accent-soft);
+    }
+    button[disabled]{opacity:.5;cursor:default;box-shadow:none;transform:none;}
+
+    .status{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-size:11px;
+      color:var(--muted);
+      margin-top:6px;
+      padding-top:6px;
+      border-top:1px dashed var(--border);
+    }
+    .dot{
+      width:8px;height:8px;border-radius:999px;background:#4b5563;margin-right:6px;
+    }
+    .dot.busy{background:#f59e0b;}
+    .dot.ok{background:#22c55e;}
+    .dot.err{background:#ef4444;}
+    .footer{
+      margin-top:6px;
+      font-size:10px;
+      color:var(--muted);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .footer a{color:var(--accent);text-decoration:none;}
+    .footer a:hover{text-decoration:underline;}
+    .pill{
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,0.6);
+      background:rgba(15,23,42,0.96);
+    }
+  </style>
+
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="logo">A</div>
+      <div>
+        <div class="title-main" data-i18n-key="brand.title">Aifura AIPP · PDF 页面尺寸统一（等比缩放居中）</div>
+        <div class="title-sub" data-i18n-key="brand.sub">将所有页面统一尺寸，并等比例缩放内容居中</div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:#a5f3fc;margin-bottom:6px;">
+        PDF Page Size Resizer · Fit & Center
+      </div>
+      <div class="lang-toggle" id="langToggle">
+        <span id="langZh" class="active">中文</span>
+        <span>|</span>
+        <span id="langEn">EN</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 上传 -->
+  <section class="panel">
+    <h2 data-i18n-key="upload.title">1. 上传 PDF 文件 · Upload PDF</h2>
+    <div class="upload-area" id="uploadArea">
+      <input type="file" id="fileInput" accept="application/pdf" />
+      <div class="upload-icon">📄</div>
+      <div class="upload-title" data-i18n-key="upload.cta">点击或拖拽 PDF 到这里</div>
+      <div class="upload-hint" data-i18n-key="upload.hint">
+        文件只在你的浏览器中处理，不会上传到服务器 · Processed locally in your browser
+      </div>
+      <div class="file-info" id="fileInfo" data-i18n-key="upload.info">
+        尚未选择文件 · No file selected
+      </div>
+    </div>
+  </section>
+
+  <!-- 尺寸设置 -->
+  <section class="panel">
+    <h2 data-i18n-key="size.title">2. 选择目标页面尺寸（所有页面将统一为这个尺寸）</h2>
+    <div class="fields">
+      <label for="presetSize" data-i18n-key="size.presetLabel">预设尺寸 Preset:</label>
+      <select id="presetSize">
+        <option value="" data-i18n-key="size.presetPlaceholder">不选择预设 · None</option>
+        <option value="A4P" data-i18n-key="size.a4p">A4 纵向 · Portrait (210×297mm)</option>
+        <option value="A4L" data-i18n-key="size.a4l">A4 横向 · Landscape (297×210mm)</option>
+        <option value="LETTERP" data-i18n-key="size.lp">Letter 纵向 · Portrait (8.5×11")</option>
+        <option value="LETTERL" data-i18n-key="size.ll">Letter 横向 · Landscape (11×8.5")</option>
+      </select>
+    </div>
+    <div class="fields" style="margin-top:6px;">
+      <span data-i18n-key="size.customLabel">或自定义尺寸（单位 mm）· Or custom (mm):</span>
+      <input type="number" id="customWidth" min="10"
+             placeholder="宽度"
+             data-i18n-placeholder-zh="宽度"
+             data-i18n-placeholder-en="Width" />
+      <input type="number" id="customHeight" min="10"
+             placeholder="高度"
+             data-i18n-placeholder-zh="高度"
+             data-i18n-placeholder-en="Height" />
+    </div>
+    <div class="tip" data-i18n-key="size.tip">
+      如果选择了预设尺寸，将优先生效；未选择预设时，将使用上方自定义宽高。内容会按比例缩放以适应目标尺寸，并自动居中，避免被裁切。
+    </div>
+  </section>
+
+  <!-- 操作 -->
+  <section class="panel">
+    <h2 data-i18n-key="action.title">3. 统一页面尺寸并导出 · Resize & export</h2>
+    <div class="btn-row">
+      <button class="btn-secondary" id="checkBtn" data-i18n-key="action.checkBtn">
+        检查当前设置 · Check settings
+      </button>
+      <button class="btn-primary" id="resizeBtn" data-i18n-key="action.resizeBtn">
+        ⬇ 等比缩放 + 居中 · 统一页面尺寸并下载
+      </button>
+    </div>
+    <div class="status">
+      <div>
+        <span class="dot" id="statusDot"></span>
+        <span id="statusText" data-i18n-key="status.ready">就绪 · Ready</span>
+      </div>
+      <div class="pill" data-i18n-key="status.pill">
+        所有页面统一尺寸，内容等比缩放并居中 · All pages same size, content scaled & centered
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">
+    <span data-i18n-key="footer.left">
+      更多 AI 工具请访问：<a href="https://aifura.com" target="_blank" rel="noopener">aifura.com</a>
+    </span>
+    <span data-i18n-key="footer.right">
+      功能：PDF 页面尺寸统一 / 等比缩放 / 居中 / A4 / Letter / 自定义
+    </span>
+  </div>
+</div>
+
+<script>
+  const { PDFDocument } = PDFLib;
+
+  let currentLang = 'zh';
+  let originalBytes = null;
+  let originalName = 'document.pdf';
+
+  const langToggle = document.getElementById('langToggle');
+  const langZh = document.getElementById('langZh');
+  const langEn = document.getElementById('langEn');
+  const fileInput = document.getElementById('fileInput');
+  const uploadArea = document.getElementById('uploadArea');
+  const fileInfo = document.getElementById('fileInfo');
+  const presetSize = document.getElementById('presetSize');
+  const customWidth = document.getElementById('customWidth');
+  const customHeight = document.getElementById('customHeight');
+  const checkBtn = document.getElementById('checkBtn');
+  const resizeBtn = document.getElementById('resizeBtn');
+  const statusDot = document.getElementById('statusDot');
+  const statusText = document.getElementById('statusText');
+
+  const i18n = {
+    en:{
+      'brand.title':'Aifura AIPP · PDF Page Size Resizer (Fit & Center)',
+      'brand.sub':'Unify all pages to the same size, scale contents proportionally and center',
+      'upload.title':'1. Upload your PDF',
+      'upload.cta':'Click or drag a PDF file here',
+      'upload.hint':'File is processed locally in your browser · not uploaded to any server',
+      'upload.info':'No file selected',
+      'size.title':'2. Choose target page size (all pages will be unified)',
+      'size.presetLabel':'Preset size:',
+      'size.presetPlaceholder':'No preset · use custom',
+      'size.a4p':'A4 Portrait (210×297mm)',
+      'size.a4l':'A4 Landscape (297×210mm)',
+      'size.lp':'Letter Portrait (8.5×11")',
+      'size.ll':'Letter Landscape (11×8.5")',
+      'size.customLabel':'Or custom size (mm):',
+      'size.tip':'If a preset size is selected, it has higher priority. Otherwise the custom width & height will be used. The page contents will be scaled proportionally to fit into the target size and centered, avoiding cropping.',
+      'action.title':'3. Resize all pages & export',
+      'action.checkBtn':'Check current settings',
+      'action.resizeBtn':'⬇ Fit & center · resize all pages & download',
+      'status.ready':'Ready',
+      'status.pill':'All pages same size · contents scaled & centered',
+      'footer.left':'More AI tools: <a href="https://aifura.com" target="_blank" rel="noopener">aifura.com</a>',
+      'footer.right':'Features: unify PDF page size / scale & center / A4 / Letter / custom'
+    },
+    zh:{
+      'status.ready':'就绪 · Ready'
+    }
+  };
+
+  function setLang(lang){
+    currentLang = lang;
+    if(lang==='zh'){langZh.classList.add('active');langEn.classList.remove('active');}
+    else{langEn.classList.add('active');langZh.classList.remove('active');}
+
+    document.querySelectorAll('[data-i18n-key]').forEach(el=>{
+      const key = el.getAttribute('data-i18n-key');
+      if(!el.dataset.i18nZh){el.dataset.i18nZh = el.innerHTML;}
+      if(lang==='zh'){
+        el.innerHTML = (i18n.zh[key] || el.dataset.i18nZh);
+      }else{
+        el.innerHTML = (i18n.en[key] || el.dataset.i18nZh);
+      }
+    });
+
+    document.querySelectorAll('[data-i18n-placeholder-zh]').forEach(el=>{
+      const zh = el.getAttribute('data-i18n-placeholder-zh') || '';
+      const en = el.getAttribute('data-i18n-placeholder-en') || '';
+      el.placeholder = (lang==='en' ? en : zh);
+    });
+  }
+
+  langToggle.addEventListener('click',e=>{
+    if(e.target.id==='langZh') setLang('zh');
+    if(e.target.id==='langEn') setLang('en');
+  });
+
+  setLang('zh');
+
+  function setStatus(state, zh, en){
+    statusDot.className='dot';
+    if(state==='busy') statusDot.classList.add('busy');
+    else if(state==='ok') statusDot.classList.add('ok');
+    else if(state==='err') statusDot.classList.add('err');
+    const text = currentLang==='en' ? (en || zh) : zh;
+    statusText.textContent = text;
+  }
+
+  function handleFile(file){
+    if(!file) return;
+    originalName = file.name || 'document.pdf';
+    const reader = new FileReader();
+    reader.onload = e=>{
+      originalBytes = new Uint8Array(e.target.result);
+      if(originalBytes.length<5){
+        originalBytes=null;
+        alert(currentLang==='en'
+          ? 'File is empty or too short to be a valid PDF.'
+          : '文件内容为空或过短，无法识别为 PDF。');
+        fileInfo.textContent = currentLang==='en'
+          ? 'No file selected'
+          : '尚未选择文件 · No file selected';
+        return;
+      }
+      const header = new TextDecoder('ascii').decode(originalBytes.subarray(0,5));
+      if(!header.startsWith('%PDF-')){
+        originalBytes=null;
+        alert(currentLang==='en'
+          ? 'This file is not a valid PDF (missing %PDF- header).'
+          : '该文件不是有效的 PDF（缺少 %PDF- 头部）。');
+        fileInfo.textContent = currentLang==='en'
+          ? 'No file selected'
+          : '尚未选择文件 · No file selected';
+        return;
+      }
+      fileInfo.textContent = (currentLang==='en'
+        ? 'Loaded: ' + originalName
+        : '已加载：' + originalName);
+      setStatus('ok','文件已加载。','PDF loaded.');
+    };
+    reader.onerror = ()=>{
+      originalBytes=null;
+      alert(currentLang==='en'
+        ? 'Failed to read file, please try again.'
+        : '读取文件失败，请重试。');
+      setStatus('err','读取文件失败。','Failed to read file.');
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  uploadArea.addEventListener('click',()=>fileInput.click());
+  uploadArea.addEventListener('dragover',e=>{e.preventDefault();});
+  uploadArea.addEventListener('drop',e=>{
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    handleFile(file);
+  });
+  fileInput.addEventListener('change',e=>{
+    const file = e.target.files[0];
+    handleFile(file);
+  });
+
+  function getTargetSizePt(){
+    let wmm = null, hmm = null;
+    const preset = presetSize.value;
+    if(preset){
+      if(preset==='A4P'){wmm=210;hmm=297;}
+      else if(preset==='A4L'){wmm=297;hmm=210;}
+      else if(preset==='LETTERP'){wmm=215.9;hmm=279.4;}
+      else if(preset==='LETTERL'){wmm=279.4;hmm=215.9;}
+    }else{
+      const w = parseFloat(customWidth.value);
+      const h = parseFloat(customHeight.value);
+      if(!w || !h || w<=0 || h<=0){
+        return null;
+      }
+      wmm = w; hmm = h;
+    }
+    const ptPerMm = 72/25.4;
+    return {width: wmm*ptPerMm, height: hmm*ptPerMm};
+  }
+
+  checkBtn.addEventListener('click',()=>{
+    if(!originalBytes){
+      alert(currentLang==='en'
+        ? 'Please upload a PDF file first.'
+        : '请先上传 PDF 文件。');
+      return;
+    }
+    const size = getTargetSizePt();
+    if(!size){
+      alert(currentLang==='en'
+        ? 'Please choose a preset or enter valid custom width & height (mm).'
+        : '请选择一个预设尺寸，或填写有效的自定义宽高（mm）。');
+      return;
+    }
+    const msgZh =
+      `当前目标页面尺寸约为：宽 ${size.width.toFixed(1)} pt，高 ${size.height.toFixed(1)} pt。\n` +
+      `导出后：所有页面将统一为该尺寸，内容会按比例缩放并居中，避免裁切。`;
+    const msgEn =
+      `Target page size: width ${size.width.toFixed(1)} pt, height ${size.height.toFixed(1)} pt.\n` +
+      `After export: all pages will use this size, contents are scaled proportionally and centered (no cropping).`;
+    alert(currentLang==='en'?msgEn:msgZh);
+  });
+
+  resizeBtn.addEventListener('click',async ()=>{
+    if(!originalBytes){
+      alert(currentLang==='en'
+        ? 'Please upload a PDF file first.'
+        : '请先上传 PDF 文件。');
+      return;
+    }
+    const target = getTargetSizePt();
+    if(!target){
+      alert(currentLang==='en'
+        ? 'Please choose a preset or enter valid custom width & height (mm).'
+        : '请选择一个预设尺寸，或填写有效的自定义宽高（mm）。');
+      return;
+    }
+
+    setStatus('busy',
+      '正在统一页面尺寸并等比缩放内容，这可能需要几秒…',
+      'Resizing pages and scaling contents, this may take a few seconds…'
+    );
+    resizeBtn.disabled = true;
+
+    try{
+      const pdfDoc = await PDFDocument.load(originalBytes);
+      const pages = pdfDoc.getPages();
+
+      for(const page of pages){
+        const { width: w0, height: h0 } = page.getSize();
+        const sx = target.width / w0;
+        const sy = target.height / h0;
+        const s = Math.min(sx, sy); // 等比缩放以适应目标尺寸，避免裁切
+
+        // 1. 按比例缩放整页（页面尺寸 + 内容 + 注释）
+        if(Math.abs(s - 1) > 0.0001){
+          page.scale(s, s);  // pdf-lib 会同时缩放尺寸和内容
+        }
+
+        // 2. 获取缩放后尺寸
+        const w1 = page.getWidth();
+        const h1 = page.getHeight();
+
+        // 3. 如果与目标尺寸不一致，就扩展画布并把内容居中
+        if(Math.abs(w1 - target.width) > 0.01 || Math.abs(h1 - target.height) > 0.01){
+          page.setSize(target.width, target.height);
+          const dx = (target.width - w1) / 2;
+          const dy = (target.height - h1) / 2;
+          page.translateContent(dx, dy);
+        }
+      }
+
+      const outBytes = await pdfDoc.save();
+      const blob = new Blob([outBytes],{type:'application/pdf'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const base = (originalName.replace(/\.pdf$/i,'') || 'document') + '-resized-fit';
+      a.href = url;
+      a.download = base + '.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      setStatus('ok','导出完成。','Export completed.');
+    }catch(e){
+      console.error(e);
+      alert(currentLang==='en'
+        ? 'Failed to resize pages. This PDF may use a special structure that pdf-lib cannot handle well.'
+        : '统一页面尺寸失败。该 PDF 可能使用了 pdf-lib 处理不佳的特殊结构。');
+      setStatus('err','导出失败。','Export failed.');
+    }finally{
+      resizeBtn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
