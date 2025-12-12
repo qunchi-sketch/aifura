@@ -160,7 +160,7 @@
   "description": "Compress images locally in your browser with smart presets for social media, ecommerce, and ultra-small uploads. Batch processing with before/after preview.",
   "description_cn": "在浏览器本地智能压缩图片，提供社交平台、电商清晰优先、极限压缩三种模式，支持批量处理与前后对比预览。",
   "tags": ["image", "compress", "batch", "webp", "jpeg", "png"],
-  "fileUrl": "aipps/image-compress/image-compress.html",
+  "fileUrl": "aipps/image-compress.html",
   "uploadTime": "2025-12-13T00:00:00Z",
   "stars": 5,
   "heat": 90,
@@ -172,6 +172,7 @@
 
 
 ]
+
 
 
 
