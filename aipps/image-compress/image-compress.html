@@ -230,7 +230,7 @@ function setMode(mode){
 function ensureWorker(){
   if (state.worker) return;
   // IMPORTANT: worker file must be same-origin to avoid CORS issues.
-  state.worker = new Worker('./compress.worker.js', { type: 'module' });
+ state.worker = new Worker('./compress.worker.js');
 
   state.worker.onmessage = (ev) => {
     const msg = ev.data;
@@ -551,3 +551,4 @@ setMode('social');
 </script>
 </body>
 </html>
+
