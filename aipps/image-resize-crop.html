@@ -1,0 +1,931 @@
+<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>图片放大缩小与自由剪裁（实时预览）- Aifura</title>
+  <meta name="description" content="浏览器本地图片放大、缩小、自由剪裁，实时预览，导出 PNG / JPG / WebP。" />
+  <meta name="keywords" content="图片裁剪,图片改尺寸,图片放大,图片缩小,自由剪裁,在线裁剪,实时预览,PNG,JPG,WebP" />
+  <meta name="author" content="Aifura" />
+  <link rel="canonical" href="./image-resize-crop-3modes.html" />
+  <link rel="alternate" hreflang="en" href="./image-resize-crop-3modes.html?lang=en" />
+  <link rel="alternate" hreflang="zh" href="./image-resize-crop-3modes.html?lang=zh" />
+  <meta name="theme-color" content="#0b0f14" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Image Enlarge / Shrink / Free Crop - Aifura" />
+  <meta property="og:description" content="Enlarge, shrink, or free-crop images locally with real-time preview. Export PNG/JPG/WebP." />
+  <meta property="og:site_name" content="Aifura" />
+  <meta property="og:url" content="./image-resize-crop-3modes.html" />
+  <meta name="twitter:card" content="summary" />
+
+  <style>
+    :root{
+      --bg:#0b0f14;--text:#e7eefc;--muted:#a9b3c1;--line:rgba(255,255,255,.12);
+      --brand:#7dd3fc;--shadow:0 10px 30px rgba(0,0,0,.35);
+      --r:16px;--r2:12px;
+      --font:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;font-family:var(--font);color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 20% 0%, rgba(125,211,252,.14), transparent 60%),
+        radial-gradient(1000px 600px at 90% 10%, rgba(52,211,153,.10), transparent 55%),
+        var(--bg);
+    }
+    a{color:inherit}
+    .wrap{max-width:1140px;margin:0 auto;padding:24px}
+    .top{
+      display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;
+    }
+    .brand{
+      display:flex;align-items:center;gap:10px;
+      user-select:none;
+    }
+    .logo{
+      width:34px;height:34px;border-radius:10px;
+      background:linear-gradient(135deg, rgba(125,211,252,.95), rgba(52,211,153,.85));
+      box-shadow:var(--shadow);
+    }
+    .brand h1{font-size:16px;margin:0}
+    .brand p{margin:0;color:var(--muted);font-size:12px}
+    .btn{
+      border:1px solid var(--line);background:rgba(255,255,255,.04);
+      color:var(--text);padding:9px 14px;border-radius:999px;
+      cursor:pointer;font-size:13px;transition:.15s ease;
+      text-decoration:none;display:inline-flex;align-items:center;justify-content:center;
+    }
+    .btn:hover{border-color:rgba(125,211,252,.45);background:rgba(125,211,252,.08)}
+    .btn.primary{border-color:rgba(125,211,252,.6);background:rgba(125,211,252,.14)}
+    .btn.ghost{background:transparent}
+    .grid{display:grid;grid-template-columns:1.35fr .65fr;gap:16px}
+    @media(max-width:980px){.grid{grid-template-columns:1fr}}
+    .card{
+      border:1px solid var(--line);
+      border-radius:var(--r);
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    }
+    .hd{
+      padding:12px 14px;border-bottom:1px solid var(--line);
+      display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+      background:rgba(0,0,0,.12);
+    }
+    .hd .title{display:flex;flex-direction:column;gap:3px}
+    .hd .title b{font-size:14px}
+    .hd .title span{font-size:12px;color:var(--muted)}
+    .body{padding:14px}
+    .modeRow{display:flex;gap:8px;flex-wrap:wrap}
+    .pill{
+      padding:7px 12px;border-radius:999px;border:1px solid var(--line);
+      font-size:12px;cursor:pointer;user-select:none;background:rgba(255,255,255,.03);
+    }
+    .pill:hover{border-color:rgba(125,211,252,.45)}
+    .pill.active{border-color:rgba(125,211,252,.75);background:rgba(125,211,252,.14)}
+    .drop{
+      border:1px dashed rgba(255,255,255,.24);
+      border-radius:var(--r2);padding:14px;
+      display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+      background:rgba(255,255,255,.03);
+    }
+    .drop b{font-size:13px}
+    .drop span{font-size:12px;color:var(--muted);line-height:1.4}
+    .stageWrap{
+      margin-top:14px;position:relative;border:1px solid var(--line);
+      border-radius:var(--r2);overflow:hidden;background:rgba(0,0,0,.35);
+      min-height:420px;
+    }
+    canvas{width:100%;height:520px;display:block}
+    @media(max-width:980px){canvas{height:460px}}
+    .overlay{position:absolute;inset:0;pointer-events:none}
+    .cropBox{
+      position:absolute;
+      border:2px solid var(--brand);
+      box-shadow:0 0 0 9999px rgba(0,0,0,.45);
+      border-radius:10px;
+      pointer-events:auto; /* ✅ allow dragging */
+      touch-action:none;
+    }
+    .cropLabel{
+      position:absolute;left:0;top:-30px;
+      font-size:12px;color:var(--text);
+      background:rgba(0,0,0,.55);
+      border:1px solid var(--line);
+      padding:6px 10px;border-radius:999px;white-space:nowrap;
+    }
+    .handle{
+      position:absolute;width:14px;height:14px;border-radius:50%;
+      background:var(--brand);border:2px solid rgba(0,0,0,.65);
+    }
+    .nw{left:-7px;top:-7px;cursor:nwse-resize}
+    .ne{right:-7px;top:-7px;cursor:nesw-resize}
+    .sw{left:-7px;bottom:-7px;cursor:nesw-resize}
+    .se{right:-7px;bottom:-7px;cursor:nwse-resize}
+    .hint{margin-top:10px;font-size:12px;color:var(--muted)}
+    .kbd{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+      font-size:11px;border:1px solid var(--line);background:rgba(255,255,255,.03);
+      padding:3px 6px;border-radius:8px;color:var(--text)
+    }
+
+    .field{margin-bottom:12px}
+    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+    input,select{
+      width:100%;padding:9px 10px;border-radius:12px;
+      background:rgba(0,0,0,.25);
+      border:1px solid var(--line);color:var(--text);
+      outline:none;
+    }
+    input:focus,select:focus{border-color:rgba(125,211,252,.55)}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .col{flex:1;min-width:160px}
+    .status{
+      margin-top:12px;font-size:12px;color:var(--muted);
+      background:rgba(0,0,0,.18);
+      border:1px solid var(--line);
+      padding:10px 12px;border-radius:12px;white-space:pre-line;line-height:1.45
+    }
+    .footer{
+      margin-top:12px;font-size:12px;color:var(--muted);
+      display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap
+    }
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <h1 id="appName">图片改尺寸 & 自由剪裁</h1>
+        <p id="appTag">放大 / 缩小 / 自由剪裁 · 实时预览 · 本地处理</p>
+      </div>
+    </div>
+    <div class="row">
+      <a class="btn ghost" href="https://aifura.com" target="_blank" rel="noopener" id="moreBtn">更多工具 → aifura.com</a>
+      <button class="btn" id="langBtn" type="button">English</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Main -->
+    <div class="card">
+      <div class="hd">
+        <div class="title">
+          <b id="mainTitle">工作区</b>
+          <span id="mainSub">上传图片后，选择放大 / 缩小 / 自由剪裁（预览实时变化）。</span>
+        </div>
+        <div class="modeRow" id="modeRow"></div>
+      </div>
+
+      <div class="body">
+        <div class="drop" id="dropZone">
+          <div>
+            <b id="dropTitle">上传图片</b><br/>
+            <span id="dropDesc">拖拽到这里 / 点击选择 / Ctrl+V 粘贴（不会上传到服务器）。</span>
+          </div>
+          <div class="row">
+            <input type="file" id="fileInput" hidden accept="image/*">
+            <button class="btn primary" id="chooseBtn" type="button">选择图片</button>
+            <button class="btn" id="clearBtn" type="button">清空</button>
+          </div>
+        </div>
+
+        <div class="stageWrap" id="stageWrap">
+          <canvas id="stage"></canvas>
+          <div class="overlay" id="overlay">
+            <div class="cropBox" id="cropBox" style="display:none;">
+              <div class="cropLabel" id="cropLabel">自由剪裁</div>
+              <div class="handle nw" data-h="nw"></div>
+              <div class="handle ne" data-h="ne"></div>
+              <div class="handle sw" data-h="sw"></div>
+              <div class="handle se" data-h="se"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hint" id="hint">
+          提示：自由剪裁时可拖动裁剪框移动；拖拽四角缩放。滚轮缩放图片，按住 <span class="kbd">Space</span> 平移。
+        </div>
+      </div>
+    </div>
+
+    <!-- Side -->
+    <div class="card">
+      <div class="hd">
+        <div class="title">
+          <b id="sideTitle">导出设置</b>
+          <span id="sideSub">放大/缩小用比例导出；自由剪裁导出选区。</span>
+        </div>
+      </div>
+
+      <div class="body">
+        <div class="field" id="scaleField">
+          <label id="scaleLabel">缩放比例 (%)</label>
+          <div class="row">
+            <div class="col">
+              <input type="range" id="scale" min="10" max="400" value="100">
+            </div>
+            <div class="col" style="min-width:120px;flex:0.7">
+              <input type="number" id="scaleNum" min="10" max="400" value="100">
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label id="formatLabel">导出格式</label>
+          <select id="format">
+            <option value="image/png">PNG</option>
+            <option value="image/jpeg">JPG</option>
+            <option value="image/webp">WebP</option>
+          </select>
+        </div>
+
+        <div class="field" id="qualityField">
+          <label id="qualityLabel">质量（JPG/WebP）</label>
+          <input type="range" id="quality" min="40" max="100" step="1" value="92">
+        </div>
+
+        <div class="row">
+          <button class="btn primary" id="exportBtn" type="button">导出</button>
+          <button class="btn" id="resetBtn" type="button">重置视图</button>
+        </div>
+
+        <div class="status" id="status">未加载图片。</div>
+
+        <div class="footer">
+          <div id="footerLeft">本地处理，不上传图片</div>
+          <div id="footerRight">More: <a href="https://aifura.com" target="_blank" rel="noopener">aifura.com</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ---------- i18n ----------
+  const I18N = {
+    zh: {
+      appName:"图片改尺寸 & 自由剪裁",
+      appTag:"放大 / 缩小 / 自由剪裁 · 实时预览 · 本地处理",
+      moreBtn:"更多工具 → aifura.com",
+      mainTitle:"工作区",
+      mainSub:"上传图片后，选择放大 / 缩小 / 自由剪裁（预览实时变化）。",
+      dropTitle:"上传图片",
+      dropDesc:"拖拽到这里 / 点击选择 / Ctrl+V 粘贴（不会上传到服务器）。",
+      chooseBtn:"选择图片",
+      clearBtn:"清空",
+      hint:'提示：自由剪裁时可拖动裁剪框移动；拖拽四角缩放。滚轮缩放图片，按住 <span class="kbd">Space</span> 平移。',
+      sideTitle:"导出设置",
+      sideSub:"放大/缩小用比例导出；自由剪裁导出选区。",
+      scaleLabel:"缩放比例 (%)",
+      formatLabel:"导出格式",
+      qualityLabel:"质量（JPG/WebP）",
+      exportBtn:"导出",
+      resetBtn:"重置视图",
+      footerLeft:"本地处理，不上传图片",
+      modes:{enlarge:"放大", shrink:"缩小", crop:"自由剪裁"},
+      statusNo:"未加载图片。",
+      statusLoaded:(w,h)=>`已加载：${w}×${h}px`,
+      statusMode:(m)=>`模式：${m}`,
+      statusScale:(p,ow,oh)=>`比例：${p}% → 输出：${ow}×${oh}px`,
+      statusCrop:(ow,oh)=>`裁剪输出：${ow}×${oh}px`,
+      statusExported:(name,ow,oh)=>`已导出：${name}\n输出：${ow}×${oh}px`
+    },
+    en: {
+      appName:"Image Enlarge / Shrink / Free Crop",
+      appTag:"3 actions · Live preview · Local processing",
+      moreBtn:"More tools → aifura.com",
+      mainTitle:"Workspace",
+      mainSub:"Upload an image, then choose Enlarge / Shrink / Free Crop (live preview).",
+      dropTitle:"Upload image",
+      dropDesc:"Drag & drop / click to choose / paste with Ctrl+V (no uploads).",
+      chooseBtn:"Choose",
+      clearBtn:"Clear",
+      hint:'Tip: In Free Crop, drag the crop box to move; drag corners to resize. Wheel to zoom image, hold <span class="kbd">Space</span> to pan.',
+      sideTitle:"Export settings",
+      sideSub:"Resize uses scale; crop exports the selected area.",
+      scaleLabel:"Scale (%)",
+      formatLabel:"Format",
+      qualityLabel:"Quality (JPG/WebP)",
+      exportBtn:"Export",
+      resetBtn:"Reset view",
+      footerLeft:"Local processing. No uploads.",
+      modes:{enlarge:"Enlarge", shrink:"Shrink", crop:"Free Crop"},
+      statusNo:"No image loaded.",
+      statusLoaded:(w,h)=>`Loaded: ${w}×${h}px`,
+      statusMode:(m)=>`Mode: ${m}`,
+      statusScale:(p,ow,oh)=>`Scale: ${p}% → Output: ${ow}×${oh}px`,
+      statusCrop:(ow,oh)=>`Crop output: ${ow}×${oh}px`,
+      statusExported:(name,ow,oh)=>`Exported: ${name}\nOutput: ${ow}×${oh}px`
+    }
+  };
+
+  function getLang(){
+    const u = new URL(location.href);
+    const q = (u.searchParams.get("lang")||"").toLowerCase();
+    if (q==="en") return "en";
+    if (q==="zh" || q==="cn" || q==="zh-cn") return "zh";
+    return "zh";
+  }
+  let lang = getLang();
+
+  const $ = (id)=>document.getElementById(id);
+  const stage = $("stage");
+  const ctx = stage.getContext("2d", {alpha:true});
+
+  const dropZone = $("dropZone");
+  const fileInput = $("fileInput");
+  const cropBox = $("cropBox");
+  const cropLabel = $("cropLabel");
+
+  const modeRow = $("modeRow");
+  const scale = $("scale");
+  const scaleNum = $("scaleNum");
+  const format = $("format");
+  const quality = $("quality");
+  const exportBtn = $("exportBtn");
+  const resetBtn = $("resetBtn");
+  const chooseBtn = $("chooseBtn");
+  const clearBtn = $("clearBtn");
+  const statusEl = $("status");
+
+  const scaleField = $("scaleField");
+  const qualityField = $("qualityField");
+
+  // ---------- State ----------
+  let mode = "crop"; // enlarge | shrink | crop
+  let img = new Image();
+  let hasImage = false;
+  let imgW = 0, imgH = 0;
+
+  // For crop mode: image view transform
+  let viewScale = 1, viewX = 0, viewY = 0;
+
+  // For live preview in resize: fit base
+  let fitScale = 1;
+
+  // Crop rect in canvas coords (CSS px == canvas px)
+  let crop = {x:120, y:90, w:420, h:320};
+
+  // Interaction
+  let isDraggingCrop = false;
+  let dragHandle = null; // "nw/ne/sw/se" or null => move box
+  let start = {px:0, py:0, cx:0, cy:0, cw:0, ch:0};
+
+  let isPanning = false;
+  let panStart = {px:0, py:0, vx:0, vy:0};
+  let spaceDown = false;
+
+  const clamp = (v,a,b)=>Math.max(a, Math.min(b, v));
+
+  function applyLang(){
+    const t = I18N[lang];
+    $("appName").textContent = t.appName;
+    $("appTag").textContent = t.appTag;
+    $("moreBtn").textContent = t.moreBtn;
+    $("mainTitle").textContent = t.mainTitle;
+    $("mainSub").textContent = t.mainSub;
+    $("dropTitle").textContent = t.dropTitle;
+    $("dropDesc").textContent = t.dropDesc;
+    chooseBtn.textContent = t.chooseBtn;
+    clearBtn.textContent = t.clearBtn;
+    $("hint").innerHTML = t.hint;
+    $("sideTitle").textContent = t.sideTitle;
+    $("sideSub").textContent = t.sideSub;
+    $("scaleLabel").textContent = t.scaleLabel;
+    $("formatLabel").textContent = t.formatLabel;
+    $("qualityLabel").textContent = t.qualityLabel;
+    exportBtn.textContent = t.exportBtn;
+    resetBtn.textContent = t.resetBtn;
+    $("footerLeft").textContent = t.footerLeft;
+
+    // SEO minimal update
+    document.title = (lang==="zh")
+      ? "图片放大缩小与自由剪裁（实时预览）- Aifura"
+      : "Image Enlarge / Shrink / Free Crop (Live Preview) - Aifura";
+
+    $("langBtn").textContent = (lang==="zh") ? "English" : "中文";
+
+    buildModeButtons();
+    refreshStatus();
+  }
+
+  function buildModeButtons(){
+    const t = I18N[lang];
+    modeRow.innerHTML = "";
+    const items = [
+      {key:"enlarge", label:t.modes.enlarge},
+      {key:"shrink", label:t.modes.shrink},
+      {key:"crop", label:t.modes.crop}
+    ];
+    for (const it of items){
+      const el = document.createElement("div");
+      el.className = "pill" + (mode===it.key ? " active" : "");
+      el.textContent = it.label;
+      el.addEventListener("click", ()=>setMode(it.key));
+      modeRow.appendChild(el);
+    }
+  }
+
+  function setMode(next){
+    mode = next;
+    buildModeButtons();
+
+    // UI visibility: scale only relevant for enlarge/shrink
+    if (mode === "crop"){
+      scaleField.style.display = "none";
+      // set scale back to 100 for clarity
+      scale.value = 100; scaleNum.value = 100;
+      if (hasImage){
+        // ensure crop box visible
+        resetCropBox();
+      }
+    } else {
+      scaleField.style.display = "";
+      cropBox.style.display = "none";
+      // nudge default values so user sees change
+      if (mode==="enlarge" && parseInt(scale.value,10) <= 100){ scale.value=150; scaleNum.value=150; }
+      if (mode==="shrink" && parseInt(scale.value,10) >= 100){ scale.value=70; scaleNum.value=70; }
+    }
+
+    render();
+    refreshStatus();
+  }
+
+  // ---------- Canvas sizing ----------
+  function fitCanvasToContainer(){
+    const wrap = $("stageWrap");
+    const rect = wrap.getBoundingClientRect();
+
+    // ✅ critical fix: DPR fixed to 1 (CSS px == canvas px)
+    const w = Math.floor(rect.width);
+    const h = Math.floor(rect.height);
+
+    if (stage.width !== w || stage.height !== h){
+      stage.width = w;
+      stage.height = h;
+      if (hasImage) resetView();
+      if (mode==="crop" && hasImage) resetCropBox();
+      render();
+    }
+  }
+
+  window.addEventListener("resize", fitCanvasToContainer);
+
+  // ---------- Rendering ----------
+  function computeFit(){
+    if (!hasImage) return;
+    fitScale = Math.min(stage.width / imgW, stage.height / imgH);
+  }
+
+  function resetView(){
+    if (!hasImage) return;
+    computeFit();
+    viewScale = fitScale;
+    viewX = (stage.width - imgW * viewScale)/2;
+    viewY = (stage.height - imgH * viewScale)/2;
+  }
+
+  function resetCropBox(){
+    // set a reasonable crop box in center
+    const bw = clamp(stage.width * 0.55, 160, stage.width - 40);
+    const bh = clamp(stage.height * 0.55, 160, stage.height - 40);
+    crop.w = bw;
+    crop.h = bh;
+    crop.x = (stage.width - bw)/2;
+    crop.y = (stage.height - bh)/2;
+    constrainCrop();
+    syncCropBox();
+  }
+
+  function constrainCrop(){
+    crop.w = clamp(crop.w, 60, stage.width - 20);
+    crop.h = clamp(crop.h, 60, stage.height - 20);
+    crop.x = clamp(crop.x, 10, stage.width - crop.w - 10);
+    crop.y = clamp(crop.y, 10, stage.height - crop.h - 10);
+  }
+
+  function syncCropBox(){
+    if (!hasImage || mode !== "crop"){
+      cropBox.style.display = "none";
+      return;
+    }
+    cropBox.style.display = "";
+    cropBox.style.left = crop.x + "px";
+    cropBox.style.top  = crop.y + "px";
+    cropBox.style.width  = crop.w + "px";
+    cropBox.style.height = crop.h + "px";
+    cropLabel.textContent = I18N[lang].modes.crop;
+  }
+
+  function clearCanvas(){
+    ctx.clearRect(0,0,stage.width,stage.height);
+    ctx.save();
+    ctx.fillStyle = "rgba(255,255,255,0.03)";
+    ctx.fillRect(0,0,stage.width,stage.height);
+    ctx.restore();
+  }
+
+  function render(){
+    fitCanvasToContainer();
+    clearCanvas();
+
+    if (!hasImage){
+      ctx.save();
+      ctx.fillStyle = "rgba(255,255,255,0.12)";
+      ctx.font = "16px " + getComputedStyle(document.body).fontFamily;
+      ctx.textAlign = "center";
+      ctx.fillText(lang==="zh" ? "请先上传图片" : "Upload an image to start", stage.width/2, stage.height/2);
+      ctx.restore();
+      syncCropBox();
+      return;
+    }
+
+    if (mode === "crop"){
+      // draw with interactive view transform
+      ctx.save();
+      ctx.translate(viewX, viewY);
+      ctx.scale(viewScale, viewScale);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(img, 0, 0);
+      ctx.restore();
+      syncCropBox();
+      return;
+    }
+
+    // enlarge/shrink live preview: fit scale * factor
+    computeFit();
+    const p = clamp(parseInt(scale.value,10) || 100, 10, 400);
+    const factor = p / 100;
+    const s = fitScale * factor;
+    const x = (stage.width - imgW * s)/2;
+    const y = (stage.height - imgH * s)/2;
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(s, s);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(img, 0, 0);
+    ctx.restore();
+
+    cropBox.style.display = "none";
+  }
+
+  // ---------- Status ----------
+  function refreshStatus(extra=""){
+    const t = I18N[lang];
+    if (!hasImage){
+      statusEl.textContent = t.statusNo;
+      return;
+    }
+
+    const lines = [];
+    lines.push(t.statusLoaded(imgW, imgH));
+    lines.push(t.statusMode(t.modes[mode]));
+
+    if (mode === "crop"){
+      // estimate crop output based on current view
+      const sx = (crop.x - viewX) / viewScale;
+      const sy = (crop.y - viewY) / viewScale;
+      const sw = crop.w / viewScale;
+      const sh = crop.h / viewScale;
+
+      const ow = Math.max(1, Math.round(clamp(sw, 1, imgW)));
+      const oh = Math.max(1, Math.round(clamp(sh, 1, imgH)));
+      lines.push(t.statusCrop(ow, oh));
+    } else {
+      const p = clamp(parseInt(scale.value,10) || 100, 10, 400);
+      const ow = Math.max(1, Math.round(imgW * (p/100)));
+      const oh = Math.max(1, Math.round(imgH * (p/100)));
+      lines.push(t.statusScale(p, ow, oh));
+    }
+
+    if (extra) lines.push(extra);
+    statusEl.textContent = lines.join("\n");
+  }
+
+  // ---------- Upload ----------
+  function loadFile(file){
+    if (!file || !file.type || !file.type.startsWith("image/")) return;
+    const url = URL.createObjectURL(file);
+    const tmp = new Image();
+    tmp.onload = () => {
+      img = tmp;
+      hasImage = true;
+      imgW = tmp.naturalWidth || tmp.width;
+      imgH = tmp.naturalHeight || tmp.height;
+      resetView();
+      if (mode === "crop") resetCropBox();
+      render();
+      refreshStatus();
+      URL.revokeObjectURL(url);
+    };
+    tmp.onerror = () => {
+      URL.revokeObjectURL(url);
+      hasImage = false;
+      render();
+      refreshStatus(lang==="zh" ? "加载失败：请换一张图片再试" : "Failed to load image.");
+    };
+    tmp.src = url;
+  }
+
+  function clearAll(){
+    hasImage = false;
+    imgW = imgH = 0;
+    cropBox.style.display = "none";
+    render();
+    refreshStatus();
+  }
+
+  // ---------- Drag & Drop ----------
+  ["dragenter","dragover"].forEach(evt => dropZone.addEventListener(evt, (e)=>{
+    e.preventDefault();
+    dropZone.style.borderColor = "rgba(125,211,252,.65)";
+    dropZone.style.background = "rgba(125,211,252,.08)";
+  }));
+  ["dragleave","drop"].forEach(evt => dropZone.addEventListener(evt, (e)=>{
+    e.preventDefault();
+    dropZone.style.borderColor = "";
+    dropZone.style.background = "";
+  }));
+  dropZone.addEventListener("drop", (e)=>{
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) loadFile(f);
+  });
+  dropZone.addEventListener("click", (e)=>{
+    if (e.target && e.target.closest("button")) return;
+    fileInput.click();
+  });
+
+  // paste
+  window.addEventListener("paste", (e)=>{
+    const items = e.clipboardData ? Array.from(e.clipboardData.items || []) : [];
+    const it = items.find(x => x.type && x.type.startsWith("image/"));
+    if (it){
+      const f = it.getAsFile();
+      if (f) loadFile(f);
+    }
+  });
+
+  // ---------- Crop interactions ----------
+  function toCanvasPoint(clientX, clientY){
+    const rect = stage.getBoundingClientRect();
+    const x = (clientX - rect.left) * (stage.width / rect.width);
+    const y = (clientY - rect.top) * (stage.height / rect.height);
+    return {x,y};
+  }
+
+  function hitHandle(target){
+    if (!target) return null;
+    if (target.classList && target.classList.contains("handle")) return target.dataset.h || null;
+    return null;
+  }
+
+  cropBox.addEventListener("pointerdown", (e)=>{
+    if (!hasImage || mode !== "crop") return;
+    e.preventDefault();
+    cropBox.setPointerCapture(e.pointerId);
+
+    dragHandle = hitHandle(e.target); // null => move whole box
+    isDraggingCrop = true;
+
+    const p = toCanvasPoint(e.clientX, e.clientY);
+    start.px = p.x; start.py = p.y;
+    start.cx = crop.x; start.cy = crop.y;
+    start.cw = crop.w; start.ch = crop.h;
+  });
+
+  cropBox.addEventListener("pointermove", (e)=>{
+    if (!isDraggingCrop || !hasImage || mode !== "crop") return;
+    e.preventDefault();
+
+    const p = toCanvasPoint(e.clientX, e.clientY);
+    const dx = p.x - start.px;
+    const dy = p.y - start.py;
+
+    if (!dragHandle){
+      // ✅ move the crop box
+      crop.x = start.cx + dx;
+      crop.y = start.cy + dy;
+      constrainCrop();
+      syncCropBox();
+      refreshStatus();
+      render();
+      return;
+    }
+
+    // resize from corners
+    let nx = start.cx, ny = start.cy, nw = start.cw, nh = start.ch;
+
+    if (dragHandle === "se"){ nw = start.cw + dx; nh = start.ch + dy; }
+    if (dragHandle === "sw"){ nx = start.cx + dx; nw = start.cw - dx; nh = start.ch + dy; }
+    if (dragHandle === "ne"){ ny = start.cy + dy; nh = start.ch - dy; nw = start.cw + dx; }
+    if (dragHandle === "nw"){ nx = start.cx + dx; ny = start.cy + dy; nw = start.cw - dx; nh = start.ch - dy; }
+
+    crop.x = nx; crop.y = ny;
+    crop.w = Math.max(60, nw);
+    crop.h = Math.max(60, nh);
+    constrainCrop();
+    syncCropBox();
+    refreshStatus();
+    render();
+  });
+
+  cropBox.addEventListener("pointerup", ()=>{
+    isDraggingCrop = false;
+    dragHandle = null;
+  });
+  cropBox.addEventListener("pointercancel", ()=>{
+    isDraggingCrop = false;
+    dragHandle = null;
+  });
+
+  // pan/zoom image in crop mode
+  window.addEventListener("keydown", (e)=>{ if (e.code === "Space") spaceDown = true; });
+  window.addEventListener("keyup", (e)=>{ if (e.code === "Space") spaceDown = false; });
+
+  stage.addEventListener("contextmenu", (e)=>{ if (mode === "crop") e.preventDefault(); });
+
+  stage.addEventListener("pointerdown", (e)=>{
+    if (!hasImage || mode !== "crop") return;
+    // pan only when Space held or right button
+    if (spaceDown || e.button === 2){
+      e.preventDefault();
+      stage.setPointerCapture(e.pointerId);
+      isPanning = true;
+      const p = toCanvasPoint(e.clientX, e.clientY);
+      panStart.px = p.x; panStart.py = p.y;
+      panStart.vx = viewX; panStart.vy = viewY;
+    }
+  });
+
+  stage.addEventListener("pointermove", (e)=>{
+    if (!isPanning || !hasImage || mode !== "crop") return;
+    e.preventDefault();
+    const p = toCanvasPoint(e.clientX, e.clientY);
+    viewX = panStart.vx + (p.x - panStart.px);
+    viewY = panStart.vy + (p.y - panStart.py);
+    refreshStatus();
+    render();
+  });
+
+  stage.addEventListener("pointerup", ()=>{ isPanning = false; });
+  stage.addEventListener("pointercancel", ()=>{ isPanning = false; });
+
+  stage.addEventListener("wheel", (e)=>{
+    if (!hasImage || mode !== "crop") return;
+    e.preventDefault();
+
+    const delta = -e.deltaY;
+    const zoomFactor = delta > 0 ? 1.08 : 0.92;
+
+    const p = toCanvasPoint(e.clientX, e.clientY);
+    const old = viewScale;
+    const next = clamp(old * zoomFactor, 0.05, 20);
+    const k = next / old;
+
+    viewX = p.x - (p.x - viewX) * k;
+    viewY = p.y - (p.y - viewY) * k;
+    viewScale = next;
+
+    refreshStatus();
+    render();
+  }, {passive:false});
+
+  // ---------- Resize inputs ----------
+  function syncScale(from){
+    let v = from === "range" ? parseInt(scale.value,10) : parseInt(scaleNum.value,10);
+    if (!isFinite(v)) v = 100;
+    v = clamp(v, 10, 400);
+    scale.value = v;
+    scaleNum.value = v;
+
+    if (mode !== "crop"){
+      render();
+      refreshStatus();
+    }
+  }
+  scale.addEventListener("input", ()=>syncScale("range"));
+  scaleNum.addEventListener("input", ()=>syncScale("num"));
+
+  // ---------- Export ----------
+  function exportImage(){
+    const t = I18N[lang];
+    if (!hasImage){
+      refreshStatus(lang==="zh" ? "请先上传图片再导出。" : "Please upload an image first.");
+      return;
+    }
+
+    const mime = format.value;
+    const q = (parseInt(quality.value,10) || 92) / 100;
+
+    const out = document.createElement("canvas");
+    const ex = out.getContext("2d", {alpha:true});
+    ex.imageSmoothingEnabled = true;
+    ex.imageSmoothingQuality = "high";
+
+    let filenameBase = "aifura";
+
+    if (mode === "crop"){
+      // map crop rect (canvas) -> image coords
+      const sx = (crop.x - viewX) / viewScale;
+      const sy = (crop.y - viewY) / viewScale;
+      const sw = crop.w / viewScale;
+      const sh = crop.h / viewScale;
+
+      const csx = clamp(sx, 0, imgW);
+      const csy = clamp(sy, 0, imgH);
+      const csw = clamp(sw, 1, imgW - csx);
+      const csh = clamp(sh, 1, imgH - csy);
+
+      out.width = Math.max(1, Math.round(csw));
+      out.height = Math.max(1, Math.round(csh));
+
+      ex.drawImage(img, csx, csy, csw, csh, 0, 0, out.width, out.height);
+      filenameBase = "crop-" + out.width + "x" + out.height;
+
+      refreshStatus(t.statusExported(filenameBase, out.width, out.height));
+    } else {
+      const p = clamp(parseInt(scale.value,10) || 100, 10, 400);
+      const ow = Math.max(1, Math.round(imgW * (p/100)));
+      const oh = Math.max(1, Math.round(imgH * (p/100)));
+
+      out.width = ow;
+      out.height = oh;
+
+      ex.drawImage(img, 0, 0, ow, oh);
+      filenameBase = (mode==="enlarge" ? "enlarge" : "shrink") + "-" + ow + "x" + oh;
+
+      refreshStatus(t.statusExported(filenameBase, ow, oh));
+    }
+
+    const ext = (mime==="image/png") ? "png" : (mime==="image/jpeg" ? "jpg" : "webp");
+    const filename = `${filenameBase}.${ext}`;
+
+    out.toBlob((blob)=>{
+      if (!blob){
+        refreshStatus(lang==="zh" ? "导出失败：浏览器不支持该格式" : "Export failed: format not supported.");
+        return;
+      }
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 1200);
+    }, mime, (mime==="image/png" ? undefined : q));
+  }
+
+  // ---------- Buttons ----------
+  chooseBtn.addEventListener("click", ()=>fileInput.click());
+  clearBtn.addEventListener("click", clearAll);
+  fileInput.addEventListener("change", ()=>{
+    const f = fileInput.files && fileInput.files[0];
+    if (f) loadFile(f);
+    fileInput.value = "";
+  });
+
+  exportBtn.addEventListener("click", exportImage);
+
+  resetBtn.addEventListener("click", ()=>{
+    if (!hasImage) return;
+    resetView();
+    if (mode==="crop") resetCropBox();
+    render();
+    refreshStatus();
+  });
+
+  // quality visibility: PNG ignores quality, keep UI but still ok
+  format.addEventListener("change", ()=>{
+    const isPng = (format.value === "image/png");
+    qualityField.style.opacity = isPng ? 0.55 : 1;
+  });
+
+  $("langBtn").addEventListener("click", ()=>{
+    const next = (lang === "zh") ? "en" : "zh";
+    lang = next;
+    const u = new URL(location.href);
+    u.searchParams.set("lang", next);
+    history.replaceState({}, "", u.toString());
+    applyLang();
+  });
+
+  // ---------- Init ----------
+  applyLang();
+  fitCanvasToContainer();
+  setMode(mode);
+  render();
+  refreshStatus();
+})();
+</script>
+</body>
+</html>
