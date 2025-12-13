@@ -166,12 +166,28 @@
   "heat": 90,
   "author": "Qun",
   "contact": "mailto:chiqun1995@foxmail.com"
+},
+  {
+  "id": "image-resize-crop-3modes",
+  "title": "Image Enlarge / Shrink / Free Crop",
+  "title_cn": "图片放大缩小与自由剪裁",
+  "description": "Enlarge, shrink, or free-crop images locally in your browser with real-time preview. Export PNG/JPG/WebP.",
+  "description_cn": "在浏览器本地对图片进行放大、缩小、自由剪裁，支持实时预览，并可导出 PNG / JPG / WebP。",
+  "tags": ["image", "resize", "crop", "png", "jpg", "webp"],
+  "fileUrl": "aipps/image-resize-crop.html",
+  "uploadTime": "2025-12-14T00:00:00Z",
+  "stars": 5,
+  "heat": 80,
+  "author": "Qun",
+  "contact": "mailto:chiqun1995@foxmail.com"
 }
 
 
 
 
+
 ]
+
 
 
 
