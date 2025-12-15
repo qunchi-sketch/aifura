@@ -180,6 +180,26 @@
   "heat": 80,
   "author": "Qun",
   "contact": "mailto:chiqun1995@foxmail.com"
+},
+  {
+  "id": "id-photo",
+  "title": "AI ID Photo Generator",
+  "title_cn": "AI 智能证件照",
+  "description": "Generate professional ID photo previews with AI. Upload a photo, choose background color, and unlock HD download with a redeem key.",
+  "description_cn": "上传照片，选择白/蓝/红底，生成证件照预览，输入兑换码解锁高清下载。",
+  "tags": [
+    "image",
+    "photo",
+    "id-photo",
+    "ai",
+    "portrait"
+  ],
+  "fileUrl": "aipps/id-photo/id-photo.html",
+  "uploadTime": "2025-12-16T00:00:00Z",
+  "stars": 5,
+  "heat": 96,
+  "author": "Aifura",
+  "contact": "mailto:chiqun1995@foxmail.com"
 }
 
 
@@ -187,6 +207,7 @@
 
 
 ]
+
 
 
 
