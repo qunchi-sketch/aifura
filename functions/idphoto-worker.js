@@ -363,15 +363,22 @@ ${bg}，干净通透，无任何杂物。
 真实、克制、专业，适合长期用于正式场合。`;
 }
 
+function buildPreviewWatermarkPrompt() {
+  return `
+预览保护要求（必须）：
+在画面右下角添加明显水印文字 “AIFURA PREVIEW”，字体较大、半透明但清晰可读，避免截图当成成品使用。
+同时在画面上以较淡方式稀疏重复出现 “AIFURA” 水印（不要过密），确保截图不可用。`;
+}
+
 // -------------------- Volc Ark --------------------
 
-async function callVolcArkImageToImage({ prompt, image }, env) {
+async function callVolcArkImageToImage({ prompt, image, size }, env) {
   const endpoint = "https://ark.cn-beijing.volces.com/api/v3/images/generations";
   const body = {
     model: String(env.ARK_MODEL || "doubao-seedream-4-5-251128").trim(),
     prompt,
-    image, // <= DataURL/base64 or URL (we use DataURL now)
-    size: String(env.ARK_SIZE || "2K").trim(),
+    image, // DataURL/base64 or URL
+    size: String(size || env.ARK_SIZE || "2K").trim(), // <-- allow override
     watermark: false
   };
 
@@ -391,6 +398,7 @@ async function callVolcArkImageToImage({ prompt, image }, env) {
   return { url: data.data[0].url, size: data.data[0].size || "" };
 }
 
+
 // -------------------- handlers --------------------
 
 async function handleGenerate(request, env) {
@@ -409,7 +417,7 @@ async function handleGenerate(request, env) {
 
   const assetId = "id_" + uuid().replace(/-/g, "").slice(0, 16);
 
-  // 1) Decode and downscale input
+  // 1) Decode and downscale input (reduce payload)
   let { bytes: inBytes, mime: inMime } = await decodeDataUrlToBytes(imgDataUrl);
   ({ bytes: inBytes, mime: inMime } = await downscaleToJpeg(inBytes, inMime, {
     maxEdge: 1280,
@@ -418,11 +426,11 @@ async function handleGenerate(request, env) {
     maxBytes: 1_500_000
   }));
 
-  // 2) Save input to R2 for auditing/debug (optional but useful)
+  // 2) Save input to R2 for later HD generation during redeem
   const inputKey = `idphoto/${assetId}/input.jpg`;
   await env.BUCKET.put(inputKey, inBytes, { httpMetadata: { contentType: inMime } });
 
-  // 3) Create a short-lived token entry (for optional /api/id/input debug)
+  // 3) short-lived token entry (debug endpoint)
   const inputTTL = parseInt(env.INPUT_TTL_SECONDS || "600", 10);
   const token = "t_" + uuid().replace(/-/g, "");
   const expiresAt = addSecondsISO(inputTTL);
@@ -430,40 +438,28 @@ async function handleGenerate(request, env) {
     "INSERT OR REPLACE INTO id_inputs(asset_id, token, expires_at, created_at) VALUES(?,?,?,?)"
   ).bind(assetId, token, expiresAt, nowISO()).run();
 
-  // 4) Build prompt
-  const prompt = buildIdPhotoPrompt(bgColor);
+  // 4) Build PREVIEW prompt: base prompt + watermark instructions
+  const promptPreview = buildIdPhotoPrompt(bgColor) + buildPreviewWatermarkPrompt();
 
-  // 5) IMPORTANT: send input as DataURL (avoid Ark downloading your workers.dev)
+  // 5) Send input as DataURL (avoid Ark pulling from workers.dev)
   const inputDataUrl = toDataUrl(inMime, inBytes);
 
-  const out = await callVolcArkImageToImage({ prompt, image: inputDataUrl }, env);
+  // 6) Generate PREVIEW only (smaller size to keep fast & stable)
+  const previewSize = String(env.ARK_PREVIEW_SIZE || "1K").trim(); // set env to "1K" or similar
+  const outPrev = await callVolcArkImageToImage({ prompt: promptPreview, image: inputDataUrl, size: previewSize }, env);
 
-  // 6) Fetch output image and store to R2
-const { bytes: outBytes, mime: outMime } = await fetchBytesFromUrl(out.url);
+  // 7) Fetch preview and store to R2
+  const { bytes: prevBytes, mime: prevMime } = await fetchBytesFromUrl(outPrev.url);
 
-// 1) HD: keep original output
-const hdKey = `idphoto/${assetId}/hd.png`;
-await env.BUCKET.put(hdKey, outBytes, { httpMetadata: { contentType: outMime } });
+  const previewKey = `idphoto/${assetId}/preview.png`;
+  await env.BUCKET.put(previewKey, prevBytes, { httpMetadata: { contentType: prevMime } });
 
-// 2) Preview: low-res + watermark (anti-screenshot)
-const preview = await makePreviewWithWatermark(outBytes, outMime, env, {
-  maxEdge: 900,
-  quality: 0.78,
-  text: "AIFURA · PREVIEW",
-  opacity: 0.28
-});
-
-// choose extension based on preview mime
-const ext = preview.mime.includes("webp") ? "webp" : "jpg";
-const previewKey = `idphoto/${assetId}/preview.${ext}`;
-
-await env.BUCKET.put(previewKey, preview.bytes, { httpMetadata: { contentType: preview.mime } });
-
-
+  // 8) Insert asset: HD is pending (NULL or empty string if your column is NOT NULL)
+  const hdKey = null; // if your DB column is NOT NULL, change to "" (empty string)
   await env.DB.prepare(
     "INSERT INTO id_assets(asset_id, created_at, bg_color, preview_r2_key, hd_r2_key, meta) VALUES(?,?,?,?,?,?)"
   )
-    .bind(assetId, nowISO(), bgColor, previewKey, hdKey, JSON.stringify({ arkSize: out.size }))
+    .bind(assetId, nowISO(), bgColor, previewKey, hdKey, JSON.stringify({ previewArkSize: outPrev.size, hdStatus: "pending" }))
     .run();
 
   await env.DB.prepare("INSERT INTO logs(id, user_id, event, meta, created_at) VALUES(?,?,?,?,?)")
@@ -473,6 +469,7 @@ await env.BUCKET.put(previewKey, preview.bytes, { httpMetadata: { contentType: p
   const previewUrl = `/api/id/asset/${assetId}/preview`;
   return json({ ok: true, assetId, previewUrl }, 200, setCookie ? { "Set-Cookie": setCookie } : {});
 }
+
 
 async function handleInputFetch(assetId, request, env) {
   // debug endpoint only (not used by main flow)
@@ -535,11 +532,18 @@ async function handleRedeem(request, env) {
 
   const key = String(body?.key || "").trim();
   const assetId = String(body?.assetId || "").trim();
-  if (!key || !assetId) return json({ ok: false, error: "BAD_REQUEST" }, 400, setCookie ? { "Set-Cookie": setCookie } : {});
+  if (!key || !assetId) {
+    return json({ ok: false, error: "BAD_REQUEST" }, 400, setCookie ? { "Set-Cookie": setCookie } : {});
+  }
 
-  const asset = await env.DB.prepare("SELECT hd_r2_key FROM id_assets WHERE asset_id=?").bind(assetId).first();
-  if (!asset) return json({ ok: false, error: "ASSET_NOT_FOUND" }, 404, setCookie ? { "Set-Cookie": setCookie } : {});
+  // Ensure asset exists
+  const assetRow = await env.DB.prepare("SELECT hd_r2_key, bg_color FROM id_assets WHERE asset_id=?")
+    .bind(assetId).first();
+  if (!assetRow) {
+    return json({ ok: false, error: "ASSET_NOT_FOUND" }, 404, setCookie ? { "Set-Cookie": setCookie } : {});
+  }
 
+  // Redeem code atomic update (1 use)
   const hash = await sha256Hex(key);
   const now = nowISO();
 
@@ -561,16 +565,47 @@ async function handleRedeem(request, env) {
     return json({ ok: false, error: "KEY_REDEEM_FAILED" }, 200, setCookie ? { "Set-Cookie": setCookie } : {});
   }
 
+  // Remaining uses after redeem
   const row2 = await env.DB.prepare("SELECT total_uses, used_uses FROM redeem_codes WHERE code_hash=?")
     .bind(hash).first();
   const remainingUses = row2 ? Math.max(0, Number(row2.total_uses) - Number(row2.used_uses)) : 0;
 
+  // If HD not generated yet, generate now (NO watermark)
+  const hdExists = assetRow.hd_r2_key && String(assetRow.hd_r2_key).trim().length > 0;
+  if (!hdExists) {
+    // Load input from R2
+    const inputKey = `idphoto/${assetId}/input.jpg`;
+    const inputObj = await env.BUCKET.get(inputKey);
+    if (!inputObj) {
+      return json({ ok: false, error: "INPUT_NOT_FOUND" }, 404, setCookie ? { "Set-Cookie": setCookie } : {});
+    }
+
+    const inputAb = await inputObj.arrayBuffer();
+    const inputBytes = new Uint8Array(inputAb);
+    const inputMime = inputObj.httpMetadata?.contentType || "image/jpeg";
+    const inputDataUrl = toDataUrl(inputMime, inputBytes);
+
+    const promptHd = buildIdPhotoPrompt(String(assetRow.bg_color || "white")); // no watermark
+    const hdSize = String(env.ARK_HD_SIZE || env.ARK_SIZE || "2K").trim();
+
+    const outHd = await callVolcArkImageToImage({ prompt: promptHd, image: inputDataUrl, size: hdSize }, env);
+    const { bytes: outBytes, mime: outMime } = await fetchBytesFromUrl(outHd.url);
+
+    const hdKey = `idphoto/${assetId}/hd.png`;
+    await env.BUCKET.put(hdKey, outBytes, { httpMetadata: { contentType: outMime } });
+
+    await env.DB.prepare("UPDATE id_assets SET hd_r2_key=?, meta=? WHERE asset_id=?")
+      .bind(hdKey, JSON.stringify({ hdArkSize: outHd.size, hdStatus: "ready" }), assetId)
+      .run();
+  }
+
+  // Create grant for download (TTL)
   const grantId = "g_" + uuid().replace(/-/g, "").slice(0, 18);
   const ttl = parseInt(env.GRANT_TTL_SECONDS || "600", 10);
 
   await env.DB.prepare(
-    "INSERT INTO grants(grant_id, user_id, asset_id, kind, expires_at, used_at, created_at) VALUES(?,?,?,?,?,?,?)"
-  ).bind(grantId, userId, assetId, "redeem", addSecondsISO(ttl), null, nowISO()).run();
+    "INSERT INTO grants(grant_id, user_id, asset_id, kind, expires_at, used_at, created_at, download_count) VALUES(?,?,?,?,?,?,?,?)"
+  ).bind(grantId, userId, assetId, "redeem", addSecondsISO(ttl), null, nowISO(), 0).run();
 
   await env.DB.prepare("INSERT INTO logs(id, user_id, event, meta, created_at) VALUES(?,?,?,?,?)")
     .bind(uuid(), userId, "id_grant_redeem", JSON.stringify({ grantId, assetId, codeHint: hintCode(key) }), nowISO())
@@ -578,6 +613,7 @@ async function handleRedeem(request, env) {
 
   return json({ ok: true, remainingUses, downloadUrl: `/api/id/dl/${grantId}` }, 200, setCookie ? { "Set-Cookie": setCookie } : {});
 }
+
 
 async function handleDownload(grantId, request, env) {
   const { userId, setCookie } = await getOrCreateUserId(request, env);
@@ -669,5 +705,6 @@ async function handleAdminCreateKeys(request, env) {
 
   return json({ ok: true, keys, totalUses, expiresAt }, 200);
 }
+
 
 
