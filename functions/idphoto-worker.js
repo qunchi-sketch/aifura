@@ -464,21 +464,50 @@ async function handleRedeem(request, env) {
 async function handleDownload(grantId, request, env) {
   const { userId, setCookie } = await getOrCreateUserId(request, env);
 
+  const MAX_DOWNLOADS = parseInt(env.GRANT_MAX_DOWNLOADS || "3", 10);
+
   const g = await env.DB.prepare(
-    "SELECT asset_id, expires_at, used_at FROM grants WHERE grant_id=? AND user_id=?"
+    "SELECT asset_id, expires_at, used_at, download_count FROM grants WHERE grant_id=? AND user_id=?"
   ).bind(grantId, userId).first();
 
-  if (!g) return json({ ok: false, error: "GRANT_NOT_FOUND" }, 404, setCookie ? { "Set-Cookie": setCookie } : {});
-  if (g.used_at) return json({ ok: false, error: "GRANT_ALREADY_USED" }, 200, setCookie ? { "Set-Cookie": setCookie } : {});
-  if (g.expires_at <= nowISO()) return json({ ok: false, error: "GRANT_EXPIRED" }, 200, setCookie ? { "Set-Cookie": setCookie } : {});
+  if (!g) {
+    return json({ ok: false, error: "GRANT_NOT_FOUND" }, 404, setCookie ? { "Set-Cookie": setCookie } : {});
+  }
 
-  const asset = await env.DB.prepare("SELECT hd_r2_key FROM id_assets WHERE asset_id=?").bind(g.asset_id).first();
-  if (!asset) return json({ ok: false, error: "ASSET_NOT_FOUND" }, 404, setCookie ? { "Set-Cookie": setCookie } : {});
+  if (g.expires_at <= nowISO()) {
+    return json({ ok: false, error: "GRANT_EXPIRED" }, 200, setCookie ? { "Set-Cookie": setCookie } : {});
+  }
 
-  await env.DB.prepare("UPDATE grants SET used_at=? WHERE grant_id=?").bind(nowISO(), grantId).run();
+  const currentCount = Number(g.download_count || 0);
+
+  // If already hit limit, block
+  if (currentCount >= MAX_DOWNLOADS) {
+    return json({ ok: false, error: "GRANT_DOWNLOAD_LIMIT" }, 200, setCookie ? { "Set-Cookie": setCookie } : {});
+  }
+
+  const asset = await env.DB.prepare("SELECT hd_r2_key FROM id_assets WHERE asset_id=?")
+    .bind(g.asset_id).first();
+
+  if (!asset) {
+    return json({ ok: false, error: "ASSET_NOT_FOUND" }, 404, setCookie ? { "Set-Cookie": setCookie } : {});
+  }
+
+  // Increment download_count BEFORE returning the file, so retries are counted deterministically.
+  // (If you want to be even more user-friendly, you can count after successful R2 get.)
+  const newCount = currentCount + 1;
+
+  await env.DB.prepare(
+    "UPDATE grants SET download_count=?, used_at=? WHERE grant_id=?"
+  ).bind(
+    newCount,
+    newCount >= MAX_DOWNLOADS ? nowISO() : null,
+    grantId
+  ).run();
 
   const obj = await env.BUCKET.get(asset.hd_r2_key);
-  if (!obj) return json({ ok: false, error: "HD_NOT_FOUND" }, 404, setCookie ? { "Set-Cookie": setCookie } : {});
+  if (!obj) {
+    return json({ ok: false, error: "HD_NOT_FOUND" }, 404, setCookie ? { "Set-Cookie": setCookie } : {});
+  }
 
   const headers = new Headers();
   obj.writeHttpMetadata(headers);
@@ -488,6 +517,7 @@ async function handleDownload(grantId, request, env) {
 
   return new Response(obj.body, { status: 200, headers });
 }
+
 
 // -------------------- admin: keys --------------------
 
@@ -521,3 +551,4 @@ async function handleAdminCreateKeys(request, env) {
 
   return json({ ok: true, keys, totalUses, expiresAt }, 200);
 }
+
