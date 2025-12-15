@@ -191,6 +191,111 @@ async function downscaleToJpeg(bytes, mime, opts = {}) {
     return { bytes, mime };
   }
 }
+// -------------------- preview: downscale + watermark --------------------
+// Create a low-res preview image with strong watermark to prevent screenshot abuse.
+
+async function makePreviewWithWatermark(bytes, mime, env, opts = {}) {
+  const MAX_EDGE = Number(env.PREVIEW_MAX_EDGE || opts.maxEdge || 900);     // preview long edge
+  const QUALITY = Number(env.PREVIEW_QUALITY || opts.quality || 0.78);      // webp/jpeg quality
+  const TEXT = String(env.PREVIEW_WATERMARK_TEXT || opts.text || "AIFURA · PREVIEW");
+  const OPACITY = Number(env.PREVIEW_WATERMARK_OPACITY || opts.opacity || 0.28);
+
+  try {
+    const blob = new Blob([bytes], { type: mime });
+    const bmp = await createImageBitmap(blob);
+
+    const scale = Math.min(1, MAX_EDGE / Math.max(bmp.width, bmp.height));
+    const w = Math.max(1, Math.round(bmp.width * scale));
+    const h = Math.max(1, Math.round(bmp.height * scale));
+
+    const canvas = new OffscreenCanvas(w, h);
+    const ctx = canvas.getContext("2d");
+
+    // image
+    ctx.drawImage(bmp, 0, 0, w, h);
+
+    // watermark (big corner)
+    ctx.save();
+    ctx.globalAlpha = OPACITY;
+    ctx.fillStyle = "#000"; // shadow base
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = Math.max(2, Math.round(Math.min(w, h) * 0.004));
+
+    const fontSize = Math.max(18, Math.round(Math.min(w, h) * 0.05)); // big
+    ctx.font = `900 ${fontSize}px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial`;
+    ctx.textBaseline = "bottom";
+
+    const pad = Math.round(fontSize * 0.6);
+    const textWidth = ctx.measureText(TEXT).width;
+
+    // draw a subtle rounded rect background for readability
+    const boxW = Math.round(textWidth + pad * 1.2);
+    const boxH = Math.round(fontSize + pad * 0.9);
+    const x = w - boxW - pad;
+    const y = h - pad;
+
+    // background
+    ctx.globalAlpha = OPACITY * 1.1;
+    ctx.fillStyle = "rgba(0,0,0,0.55)";
+    roundRect(ctx, x, y - boxH, boxW, boxH, Math.round(boxH * 0.28));
+    ctx.fill();
+
+    // text
+    ctx.globalAlpha = OPACITY * 1.3;
+    ctx.fillStyle = "rgba(255,255,255,0.95)";
+    ctx.strokeStyle = "rgba(0,0,0,0.35)";
+    ctx.lineWidth = Math.max(2, Math.round(fontSize * 0.08));
+    ctx.strokeText(TEXT, x + Math.round(pad * 0.6), y - Math.round(pad * 0.35));
+    ctx.fillText(TEXT, x + Math.round(pad * 0.6), y - Math.round(pad * 0.35));
+
+    // optional: light diagonal repeat for stronger anti-screenshot
+    const REPEAT = String(env.PREVIEW_WATERMARK_REPEAT || "1") !== "0";
+    if (REPEAT) {
+      ctx.globalAlpha = OPACITY * 0.16;
+      ctx.fillStyle = "rgba(255,255,255,0.9)";
+      const small = Math.max(12, Math.round(Math.min(w, h) * 0.028));
+      ctx.font = `800 ${small}px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial`;
+      ctx.translate(w / 2, h / 2);
+      ctx.rotate(-Math.PI / 6);
+      const stepX = Math.max(180, Math.round(w * 0.28));
+      const stepY = Math.max(140, Math.round(h * 0.22));
+      for (let yy = -h; yy <= h; yy += stepY) {
+        for (let xx = -w; xx <= w; xx += stepX) {
+          ctx.fillText("AIFURA", xx, yy);
+        }
+      }
+    }
+    ctx.restore();
+
+    // output as webp if possible, else jpeg
+    let outType = "image/webp";
+    let outBlob;
+    try {
+      outBlob = await canvas.convertToBlob({ type: outType, quality: QUALITY });
+      const ab = await outBlob.arrayBuffer();
+      return { bytes: new Uint8Array(ab), mime: outType };
+    } catch {
+      outType = "image/jpeg";
+      outBlob = await canvas.convertToBlob({ type: outType, quality: QUALITY });
+      const ab = await outBlob.arrayBuffer();
+      return { bytes: new Uint8Array(ab), mime: outType };
+    }
+  } catch {
+    // If image APIs not available, fallback: return original (still better than breaking)
+    return { bytes, mime };
+  }
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  const rr = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + rr, y);
+  ctx.arcTo(x + w, y, x + w, y + h, rr);
+  ctx.arcTo(x + w, y + h, x, y + h, rr);
+  ctx.arcTo(x, y + h, x, y, rr);
+  ctx.arcTo(x, y, x + w, y, rr);
+  ctx.closePath();
+}
 
 // -------------------- DB aux table --------------------
 
@@ -334,13 +439,26 @@ async function handleGenerate(request, env) {
   const out = await callVolcArkImageToImage({ prompt, image: inputDataUrl }, env);
 
   // 6) Fetch output image and store to R2
-  const { bytes: outBytes, mime: outMime } = await fetchBytesFromUrl(out.url);
+const { bytes: outBytes, mime: outMime } = await fetchBytesFromUrl(out.url);
 
-  const previewKey = `idphoto/${assetId}/preview.png`;
-  const hdKey = `idphoto/${assetId}/hd.png`;
+// 1) HD: keep original output
+const hdKey = `idphoto/${assetId}/hd.png`;
+await env.BUCKET.put(hdKey, outBytes, { httpMetadata: { contentType: outMime } });
 
-  await env.BUCKET.put(hdKey, outBytes, { httpMetadata: { contentType: outMime } });
-  await env.BUCKET.put(previewKey, outBytes, { httpMetadata: { contentType: outMime } });
+// 2) Preview: low-res + watermark (anti-screenshot)
+const preview = await makePreviewWithWatermark(outBytes, outMime, env, {
+  maxEdge: 900,
+  quality: 0.78,
+  text: "AIFURA · PREVIEW",
+  opacity: 0.28
+});
+
+// choose extension based on preview mime
+const ext = preview.mime.includes("webp") ? "webp" : "jpg";
+const previewKey = `idphoto/${assetId}/preview.${ext}`;
+
+await env.BUCKET.put(previewKey, preview.bytes, { httpMetadata: { contentType: preview.mime } });
+
 
   await env.DB.prepare(
     "INSERT INTO id_assets(asset_id, created_at, bg_color, preview_r2_key, hd_r2_key, meta) VALUES(?,?,?,?,?,?)"
@@ -551,4 +669,5 @@ async function handleAdminCreateKeys(request, env) {
 
   return json({ ok: true, keys, totalUses, expiresAt }, 200);
 }
+
 
